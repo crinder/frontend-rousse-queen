@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 const CrearOrden = () => {
 
   const [changeCheck, useChangeCheck] = useState(false);
-  const [checkPago, useCheckPago] = useState(false);
+  const [checkPago, setCheckPago] = useState(false);
   const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
   const [opciones, setOpciones] = useState([]);
   const [cantidad, setCantidad] = useState({});
@@ -25,11 +25,13 @@ const CrearOrden = () => {
   const [detalleMenu, setDetalleMenu] = useState([]);
   const token = localStorage.getItem("token");
   const idcaja = localStorage.getItem("idcaja");
+  const [ingredinetes, setIngredinetes] = useState(false);
 
   useEffect(() => {
     devuelveMenu();
     devuelveTipo();
   }, []);
+  
 
   useEffect(() => {
 
@@ -55,6 +57,20 @@ const CrearOrden = () => {
 
 
   }, [cantidad, mdelivery]);
+
+  useEffect(() => {
+    if (ingredinetes) {
+      setCheckPago(false);
+    }
+  }, [ingredinetes]);
+
+  useEffect(() => {
+    if (checkPago) {
+      setIngredinetes(false);
+    }
+  }, [checkPago]);
+
+
 
   const devuelveTipo = async () => {
 
@@ -177,14 +193,18 @@ const CrearOrden = () => {
 
     if (dataRegis.status == 'success') {
 
-      console.log(changeCheck);
+
 
       if (checkPago) {
         let idOrden = 'valor';
 
-        navigate('/rousse/pagar', { state: { idOrden } });
+        navigate('/rousse/pagar', { state: { idOrden: dataRegis.ordenSave  } });
 
-      } else {
+      }else if(ingredinetes){
+      
+        navigate('/rousse/detalle-orden',{ state: { idOrden: dataRegis.ordenSave } });
+      
+      }else {
         let valor = 1;
         navigate('/rousse/success', { state: { valor } });
 
@@ -303,9 +323,6 @@ const CrearOrden = () => {
     useChangeCheck(evento.target.checked);
   };
 
-  const manejarCambioPago = (evento) => {
-    useCheckPago(evento.target.checked);
-  }
 
   const montoDelivery = (event) => {
 
@@ -383,7 +400,7 @@ const CrearOrden = () => {
 
 
             {(ordenType != 1 && ordenType != 4) &&
-              <div class="form-check form-switch">
+              <div className="form-check form-switch">
                 <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={manejarCambio} checked={changeCheck} />
                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Delivery?</label>
               </div>
@@ -421,28 +438,13 @@ const CrearOrden = () => {
             })}
           </div>
 
-          <div className='menu__select'>
-
-            <div className='menu__title'>
-              <h3 className='title__menu'>Quitar de la orden</h3>
-            </div>
-
-            {opcionesSeleccionadas && opcionesSeleccionadas.length > 0 && opcionesSeleccionadas.map((opcion, index) => {
-
-              return (
-                <article>
-                  <span className='select__opcion'>{opcion.description}</span>
-                </article>
-              )
-
-            })
-
-            }
-
+          <div className="form-check form-switch">
+            <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={ e => setIngredinetes(e.target.checked)} checked={ingredinetes} />
+            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Añadir o quitar ingredientes?</label>
           </div>
 
           <div className="form-check form-switch">
-            <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={manejarCambioPago} checked={checkPago} />
+            <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={e => setCheckPago(e.target.checked)} checked={checkPago} />
             <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Pago inmediato?</label>
           </div>
 

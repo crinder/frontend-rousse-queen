@@ -21,15 +21,10 @@ const Pagar = () => {
     const location = useLocation();
     const token = localStorage.getItem("token");
     let idOrden = location.state.idOrden;
-    let c_total = location.state.total;
-
-
-    useEffect(() =>{
-        setMontoUs(c_total);
-    },[]);
 
     useEffect(() => {
         if (idOrden) {
+            devuelveOrden();
             devuelveMetodos();
         } else {
             navigate('/rousse/home');
@@ -60,6 +55,25 @@ const Pagar = () => {
         setVueltoUs(0);
         setVueltoBs(0);
 
+    }
+
+    const devuelveOrden = async () => {
+
+        const request = await fetch(Global.url + 'orden/list-detail/' + idOrden, {
+            method: "GET",
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await request.json();
+
+        if (data.status == "success") {
+            setMontoUs(data.ordens[0].total);
+        } else {
+            console.log('error');
+        }
     }
 
     const paymement2 = () => {
@@ -101,9 +115,9 @@ const Pagar = () => {
 
             setVueltoUs1(total);
 
-        }else if(paymement == 1){
+        } else if (paymement == 1) {
 
-            setRecibidoBS(montoUs*tasa);
+            setRecibidoBS(montoUs * tasa);
         }
 
     }
@@ -182,59 +196,59 @@ const Pagar = () => {
 
         let recibido = recibidoUS - vueltoUs;
         let recibeBS = recibidoBS - vueltoBs;
-        let vueltobol = vueltoBs/tasa;
-        let vueltos = vueltobol+vueltoUs;
+        let vueltobol = vueltoBs / tasa;
+        let vueltos = vueltobol + vueltoUs;
         let totalRecibido = recibido + recibeBS;
 
-        if(paymement == 2){
-        
-            if( vueltos > recibidoUS){
+        if (paymement == 2) {
+
+            if (vueltos > recibidoUS) {
                 message = 'Vuelto no puede ser mayor al recibido';
             }
 
-            if(vueltos > montoUs){
+            if (vueltos > montoUs) {
                 message = 'Vuelto no puede ser mayor al total...';
             }
 
-            if(recibidoUS < montoUs){
+            if (recibidoUS < montoUs) {
                 message = 'El monto recibido no puede ser menor al total...';
             }
 
-            if(recibido < montoUs ){
+            if (recibido < montoUs) {
                 message = 'El monto recibido no puede ser menor al total';
             }
-        }else if (paymement == 1){
+        } else if (paymement == 1) {
 
-            if(recibeBS < montoUs){
-                message = 'El monto recibido no puede ser menor al total';
-            }
-
-        }else if(paymement == 3 || paymement == 4){
-
-            if(totalRecibido < montoUs ){
+            if (recibeBS < montoUs) {
                 message = 'El monto recibido no puede ser menor al total';
             }
 
-            if(vueltos > montoUs){
+        } else if (paymement == 3 || paymement == 4) {
+
+            if (totalRecibido < montoUs) {
+                message = 'El monto recibido no puede ser menor al total';
+            }
+
+            if (vueltos > montoUs) {
                 message = "El vuelto no puede ser mayor al total"
             }
 
         }
-    
+
         return message;
 
     }
 
     /*Cobrar */
 
-    const cobrar = async(event) => {
+    const cobrar = async (event) => {
         event.preventDefault();
 
         //crear objeto
 
         const message = await validaMontos();
 
-        if(message != 1){
+        if (message != 1) {
             console.log(message);
             return
         }
@@ -243,7 +257,7 @@ const Pagar = () => {
             paymement_method: paymement,
             rate: tasa,
             total: montoUs,
-            total_local: montoUs*tasa,
+            total_local: montoUs * tasa,
             total_money: montoUs,
             received_local: recibidoBS,
             received_money: recibidoUS,
@@ -251,10 +265,10 @@ const Pagar = () => {
             change_money: vueltoUs
         }
 
-        const requestSave = await fetch(Global.url+'det-orden/register/'+idOrden,{
+        const requestSave = await fetch(Global.url + 'det-orden/register/' + idOrden, {
             method: 'POST',
             body: JSON.stringify(c_body),
-            headers:{
+            headers: {
                 "Content-type": "application/json",
                 "authorization": token
             }
@@ -262,12 +276,12 @@ const Pagar = () => {
 
         const dataSaved = await requestSave.json();
 
-        if(dataSaved.status == "success"){
+        if (dataSaved.status == "success") {
             let valor = 2; //pagar
 
             navigate('/rousse/success', { state: { valor } });
 
-        }else{
+        } else {
             console.log('error');
             let valor = 3; //pagar
 
@@ -282,6 +296,11 @@ const Pagar = () => {
                 <section className=''>
 
                     <form className='orden__det' onSubmit={cobrar}>
+
+                        <div className='pagar__span'>
+                            <span className='title__color title__pagar'>Total a Pagar: {montoUs}$</span>
+                        </div>
+
                         <div className='content__field'>
                             <label className="user__label--orden" htmlFor="paymement_method">Metodo de pago</label>
                             <select name="orderType" className="user__input--orden" onChange={changeMethod}>
@@ -293,23 +312,19 @@ const Pagar = () => {
                             </select>
                         </div>
 
-                        <div className='pagar__span'>
-                            <span className='title__color title__pagar'>Total a Pagar: {montoUs}</span>
-                        </div>
-
                         {paymement == 2 && (
                             <section className='method__pago'>
 
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido</label>
-                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required/>
+                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required />
                                 </div>
 
                                 <div className='content__field'>
 
                                     <label htmlFor="received_money" className='label__form'>Vuelto US</label>
-                                    <input type="text" name='change_money' id='change_money' className='input__form' onChange={changedVueltoUs} value={vueltoUs} required/>
+                                    <input type="text" name='change_money' id='change_money' className='input__form' onChange={changedVueltoUs} value={vueltoUs} required />
 
                                 </div>
 
@@ -327,7 +342,7 @@ const Pagar = () => {
                             <section className='method__pago'>
                                 <div className='content__field'>
                                     <label htmlFor="total_local" className='label__form'>Monto Bs.</label>
-                                    <input type="text" name='total_local' id='total_local' className='input__form' readOnly value={recibidoBS}/>
+                                    <input type="text" name='total_local' id='total_local' className='input__form' readOnly value={recibidoBS} />
                                 </div>
                             </section>
                         )}
@@ -336,17 +351,17 @@ const Pagar = () => {
                             <section className='method__pago'>
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido US</label>
-                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required/>
+                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required />
                                 </div>
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido BS</label>
-                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required/>
+                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required />
                                 </div>
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Vuelto US</label>
-                                    <input type="text" name='change_local' id='change_local' className='input__form' onChange={changedVueltoUs} value={vueltoUs1} required/>
+                                    <input type="text" name='change_local' id='change_local' className='input__form' onChange={changedVueltoUs} value={vueltoUs1} required />
                                 </div>
 
                             </section>
@@ -356,17 +371,17 @@ const Pagar = () => {
                             <section className='method__pago'>
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido US</label>
-                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} required/>
+                                    <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} required />
                                 </div>
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido BS</label>
-                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required/>
+                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required />
                                 </div>
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Vuelto US</label>
-                                    <input type="text" name='change_local' id='change_local' className='input__form' onChange={changedVueltoUs} value={vueltoUs1} required/>
+                                    <input type="text" name='change_local' id='change_local' className='input__form' onChange={changedVueltoUs} value={vueltoUs1} required />
                                 </div>
                             </section>
                         )}
@@ -411,7 +426,5 @@ const Pagar = () => {
         </div>
     )
 }
-
-
 
 export default Pagar

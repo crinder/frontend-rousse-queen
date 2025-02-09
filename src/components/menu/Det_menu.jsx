@@ -3,7 +3,7 @@ import Global from '../../helpers/Global';
 import useForm from '../../assets/hooks/useForm';
 import Multiselect from 'multiselect-react-dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faRotateRight, faCheckToSlot } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router-dom';
 
 
@@ -14,6 +14,7 @@ const Det_menu = () => {
     const location = useLocation();
     const [NombreMenu, setNombreMenu] = useState('');
     const [resta, setResta] = useState('');
+    const [opcional, setOpcional] = useState('');
     let id_menu = location.state.idmenu;
     let nombre = 0;
 
@@ -156,11 +157,21 @@ const Det_menu = () => {
 
     const ActualizarArticulo = async (id, iddetmenu) => {
         const act = resta[id];
+        const opc = opcional[id];
 
         let body = {
-            id_menu: id_menu,
-            subtract: act
+            id_menu: id_menu
+        };
+
+        if (act) {
+            body.subtract = act;
         }
+
+        if (opc) {
+            body.opcional = opc;
+        }
+
+        console.log(body);
 
         const requestUpdate = await fetch(Global.url + 'det-menu/update/' + iddetmenu, {
             method: "PUT",
@@ -197,6 +208,19 @@ const Det_menu = () => {
             setSaved("error");
             setDetmenus(data);
         }
+    }
+
+    const articulOpcional = (evento, id) => {
+
+        console.log(resta);
+        let opc = evento.target.checked ? 'S' : 'N';
+
+        setOpcional({
+            ...resta,
+            [id]: opc
+        });
+
+
     }
 
     return (
@@ -242,6 +266,12 @@ const Det_menu = () => {
                                                         <FontAwesomeIcon icon={faRotateRight} className='menu__icon--select list__icon' onClick={() => ActualizarArticulo(subMenu.id_article._id, subMenu._id)} />
                                                     </div>
 
+                                                    <div className='detmenu__menu--det'>
+                                                        <span className='title__det-menu'>Opcional?</span>
+                                                        <div>
+                                                            <input type="checkbox" name='optional' id='optional' required onChange={(evento) => articulOpcional(evento, subMenu.id_article._id)} defaultValue={subMenu.subtract} />
+                                                        </div>
+                                                    </div>
 
 
                                                 </div>

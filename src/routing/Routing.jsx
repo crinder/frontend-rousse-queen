@@ -18,6 +18,11 @@ import Articulos from '../components/articulos/Articulos';
 import Movimientos from '../components/movimientos/Movimientos';
 import OtrosPagos from '../components/movimientos/OtrosPagos';
 import Historico from '../components/movimientos/Historico';
+import DetalleOrden from '../components/ordenes/DetalleOrden';
+import Listado from '../components/articulos/Listado';
+import Ordenes from '../components/ordenes/Ordenes';
+import Delivery from '../components/config/Delivery';
+import ListDelivery from '../components/config/ListDelivery';
 
 
 const Routing = () => {
@@ -46,6 +51,11 @@ const Routing = () => {
                             <Route path='movimientos' element={<Movimientos/>}></Route>
                             <Route path='pago-tercero' element={<OtrosPagos/>}></Route>
                             <Route path='historico-ordenes' element={<Historico/>}></Route>
+                            <Route path='detalle-orden' element={<DetalleOrden/>}></Route>
+                            <Route path='listado-articulos' element={<Listado/>}></Route>
+                            <Route path='crear-ordenes' element={<Ordenes/>}></Route>
+                            <Route path='deliveries' element={<Delivery/>}></Route>
+                            <Route path='list-deliveries' element={<ListDelivery/>}></Route>
                         </Route>
                     </Routes>
                 </AuthProvider>

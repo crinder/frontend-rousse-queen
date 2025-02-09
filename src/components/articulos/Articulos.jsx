@@ -1,32 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Global from '../../helpers/Global';
 import useForm from '../../assets/hooks/useForm';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import {IconDelete} from '../Util/Iconos';
 
 const Articulos = () => {
 
-
-  /*{<li className='articulo__listar'>
-       <div className="form-check form-switch">
-       <input className="form-check-input" type="checkbox" role="switch" id={`flexSwitchCheckDefault${articulo._id}`} onChange={() => toggleActualizar(articulo._id)} />
-       <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Actualizar?</label>
-     </div>
-       </li>}
-
-       </ul>
-
-       {idsParaActualizar.includes(articulo._id) && (
-         <div>
-           <div className='content__field--menu'>
-             <input type="text" name='name_article' id='name_article' className='input__form--menu' placeholder=' ' required onChange={(evento) => actInve(evento, articulo._id)} />
-             <label htmlFor="name_article" className='label__form--menu'>Actualizar artículo</label>
-           </div>
-           <FontAwesomeIcon icon={faRotateRight} className='menu__icon--select list__icon' onClick={() => ActualizarArticulo(articulo._id)} />
-         </div>
-
-
-       )}*/
 
   const [lista, setLista] = useState("");
   const [articulos, setArticulos] = useState([]);
@@ -35,25 +13,13 @@ const Articulos = () => {
   const { form, changed } = useForm({});
   const [saved, setSaved] = useState("");
   const [articulo, setArticulo] = useState("");
-  const [artmanual, setArtManual] = useState([]);
-  const [articuloAct, setArticuloAct] = useState({});
   const [isContable, setIsContable] = useState(false);
+  const [extra, setExtra] = useState('N');
 
   useEffect(() => {
 
     listar();
   }, []);
-
-
-  const toggleActualizar = (id,valor) => {
-
-    setIdsParaActualizar((valores) => ({
-      ...valores,
-      [id]: valor
-    }));
-
-  };
-
 
   const listar = async () => {
     let sucursal = 1
@@ -89,15 +55,16 @@ const Articulos = () => {
     e.preventDefault();
 
     const articulos = form;
-    let contable = 'N';
 
-    console.log(articulos);
-
-    if(isContable){
-      contable = 'S';
+    if(extra == 'N'){
+      articulos.price = 0;
     }
 
-    articulos.contable = contable;
+
+    articulos.contable = isContable;
+    articulos.extra = extra;
+
+    console.log(articulos);
 
     let token = localStorage.getItem('token');
 
@@ -123,64 +90,27 @@ const Articulos = () => {
     }
   }
 
-  const actInve = (evento, id) => {
-
-    setArticuloAct({
-      ...articuloAct,
-      [id]: evento.target.value
-    })
-
-  }
-
-  const ActualizarManual = (evento,id) =>{
-
-
-    const artExist = artmanual.some((seleted) => seleted.id == id);
-
-    setArtManual(
-      artExist
-        ? artmanual.filter((selected) => selected.id !== id)
-        : [...artmanual, { id: id}]
-    );
+ const EliminarArticulo = async (id) => {
    
-    
-  }
+   const request = await fetch(Global.url + 'article/delete/' + id, {
+     method: "GET",
+     headers: {
+       "authorization": token,
+       "Content-Type": "application/json"
+     }
+   });
+   
+   const data = await request.json();
+   
+   if (data.status == "success") {
+     listar();
+   } else {
+     console.log('error');
+   }
+ }
+
+
  
-  const ActualizarArticulo = async (e) => {
-
-    e.preventDefault();
-
-    const articulos = form;
-
-    console.log(idsParaActualizar);
-
-    console.log(artmanual);
-
-
-    let body = {
-      articulos: idsParaActualizar,
-      artmanual: artmanual
-    }
-
-    const requestUpdate = await fetch(Global.url + 'article/update-inventory', {
-
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: {
-        "authorization": token,
-        "Content-Type": "application/json"
-      }
-
-    });
-
-    const dataUpdate = await requestUpdate.json();
-
-    if (dataUpdate.status == 'success') {
-      listar();
-    }
-
-  }
-
 
   return (
     <div className='articulos__articulos'>
@@ -195,23 +125,23 @@ const Articulos = () => {
 
           <section className='title_menu'>
 
-            <form className='form_articulo' onSubmit={ActualizarArticulo}>
+            <form className='form_articulo'>
 
               <ul className='menu__list'>
                 <li className='menu__item'>
-                  <span className='item__title'>Artículos</span>
+                  <span className='item__title'>Articulos</span>
                 </li>
                 <li className='menu__item'>
-                  <span className='item__title'>Actualizar articulo</span>
+                  <span className='item__title'>Articulo contable</span>
                 </li>
                 <li className='menu__item'>
-                  <span className='item__title'>Disponible</span>
+                  <span className='item__title'>Ingrediente extra</span>
                 </li>
                 <li className='menu__item'>
-                  <span className='item__title'>Inventario anterior</span>
+                  <span className='item__title'>Costo extra</span>
                 </li>
                 <li className='menu__item'>
-                  <span className='item__title'>Inventario manual</span>
+                  <span className='item__title'>Eliminar</span>
                 </li>
               </ul>
 
@@ -228,36 +158,29 @@ const Articulos = () => {
 
                     <li className='articulo__item'>
                       <div className='articulo__container'>
-                        <p className='articulo_descrip'>
-                          <input className='input__form--articulo' type="text" name="art_dispo" id="art_dispo" defaultValue={0}
-                            onChange={(e)=> toggleActualizar(articulo._id,e.target.value)}
-                          />
-                        </p>
+                        <p className='articulo_descrip'> {articulo.contable == 'S' ? 'Si' : 'No'}</p>
                       </div>
                     </li>
 
                     <li className='articulo__item'>
 
                       <div className='articulo__container'>
-                      <p className='articulo_descrip'> {articulo.availability}</p>
+                      <p className='articulo_descrip'> {articulo.extra == 'S' ? 'Si' : 'No'}</p>
                       </div>
                     </li>
 
                     <li className='articulo__item'>
                       <div className='articulo__container'>
-                        <p className='articulo_descrip'> {articulo.inv_before}</p>
+                        <p className='articulo_descrip'> {articulo.price}</p>
                       </div>
 
                     </li>
 
                     <li className='articulo__item'>
                       <div className='articulo__container'>
-                        <p className='articulo_descrip'>
-                          <input  type="checkbox" name="art_dispo" id="art_dispo" 
-                            onChange={(e)=> ActualizarManual(e.target.checked,articulo._id)}
-                          />
-                        </p>
+                        <i onClick={() => EliminarArticulo(articulo._id)} className='icono-tabler icono-tabler-trash'><IconDelete/></i>
                       </div>
+
                     </li>
                   </ul>
 
@@ -302,9 +225,20 @@ const Articulos = () => {
 
                 <div className='content__field--menu'>
                   <label htmlFor="contable" className='label__form'>Articulo contable?</label>
-                  <input type="checkbox" name='contable' id='contable' onChange={(e) => setIsContable(e.target.checked)} />
+                  <input type="checkbox" name='contable' id='contable' onChange={(e) => setIsContable(e.target.checked ? 'S' : 'N')} />
                 </div>
 
+                <div className='content__field--menu'>
+                  <label htmlFor="contable" className='label__form'>Ingrediente extra?</label>
+                  <input type="checkbox" name='contable' id='contable' onChange={(e) => setExtra(e.target.checked ? 'S' : 'N')} />
+                </div>
+
+                {extra == 'S' &&
+                  <div className='content__field--menu'>
+                    <label htmlFor="contable" className='label__form'>Precio extra</label>
+                    <input type="text" name='price' id='price' className='input__form--menu input__control' placeholder=' ' onChange={changed}  />
+                  </div>
+                }
 
                 <input type="submit" className='user__button' value="Crear articulo" />
 
