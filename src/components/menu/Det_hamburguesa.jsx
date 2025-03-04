@@ -7,20 +7,16 @@ import { faTrash, faRotateRight, faCheckToSlot } from '@fortawesome/free-solid-s
 import { useLocation } from 'react-router-dom';
 
 
-const Det_menu = () => {
+const Det_hamburguesa = () => {
 
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
-    const [opcionesSeleccionadasHam, setOpcionesSeleccionadasHam] = useState([]);
     const [opciones, setOpciones] = useState([]);
     const location = useLocation();
     const [NombreMenu, setNombreMenu] = useState('');
     const [resta, setResta] = useState('');
     const [opcional, setOpcional] = useState('');
     const [hamburguesa, setHamburguesa] = useState(false);
-    const [hamburguesas, setHamburguesas] = useState(false);
-    const [opcionesHamburguesa, setOpcionesHamburguesa] = useState([]);
-    const [cantidadHamburguesa, setCantidadHamburguesa] = useState(0);
-
+    const [elegir, setElegir] = useState(false);
     let id_menu = location.state.idmenu;
     let nombre = 0;
 
@@ -38,45 +34,6 @@ const Det_menu = () => {
             [id]: evento.target.value
         });
 
-    }
-
-    const eliminarHamburguesa = (id) => {
-
-        const hamburguesasSelect = opcionesHamburguesa.filter(item => item.id != id);
-        const hamburguesasEli = opcionesHamburguesa.filter(item => item.id == id);
-
-        let c_body = hamburguesasSelect.map(item => ({
-            id_hamburguesa: item.id
-        }));
-
-        insertHamburguesa(c_body);
-        setHamburguesas(hamburguesasEli);
-        setOpcionesSeleccionadasHam(hamburguesasSelect);
-
-    }
-
-    const onSelectHam = (selectedList, selectedItem) => {
-
-        const hamburguesasSelect = selectedList.map(item => ({
-            id_hamburguesa: item.id
-        }));
-
-        insertHamburguesa(hamburguesasSelect);
-
-        setOpcionesSeleccionadasHam(selectedList);
-    }
-
-    const onRemoveHam = (selectedList, removedItem) => {
-
-        for (let opcion of selectedList) {
-            const obj = {
-                id_article: opcion.id
-            }
-
-            //deletetMenu(obj);
-        }
-
-        setOpcionesSeleccionadasHam(selectedList);
     }
 
 
@@ -145,32 +102,6 @@ const Det_menu = () => {
 
     }
 
-    const insertHamburguesa = async (obj) => {
-
-        let c_body = {
-            id_hamburguesa: obj,
-            cantidad_hamburguesa: cantidadHamburguesa
-        }
-
-        const request = await fetch(Global.url + 'menu/update/' + id_menu, {
-            method: "POST",
-            body: JSON.stringify(c_body),
-            headers: {
-                "authorization": token,
-                "Content-Type": "application/json"
-            }
-        });
-
-        const data = await request.json();
-
-        if (data.status == "success") {
-            devuelveDetalle();
-            articulosActualizado();
-        } else {
-            setGuardado("error");
-        }
-    }
-
     const insertMenu = async (obj) => {
 
         console.log('insert...' + id_menu);
@@ -219,30 +150,6 @@ const Det_menu = () => {
 
             setOpciones(opcionesMap);
 
-
-            const hamburguesasSelect = dataArt.hamburguesaSelect.map(menu => ({
-
-                name: menu.description,
-                id: menu._id
-            }));
-
-            setHamburguesas(hamburguesasSelect);
-
-            console.log(dataArt.hamburguesaSelect);
-
-
-            if (dataArt.hamburguesaSelect.length > 0) {
-
-                const hamburguesasMap = dataArt.hamburguesaSelect.map(menu => ({
-
-                    name: menu.description,
-                    id: menu._id
-                }));
-
-                setOpcionesHamburguesa(hamburguesasMap);
-            }
-
-
         } else {
             setSaved("error");
             setArticles("");
@@ -253,6 +160,7 @@ const Det_menu = () => {
     const ActualizarArticulo = async (id, iddetmenu) => {
         const act = resta[id];
         const opc = opcional[id];
+        const ele = elegir[id];
 
         let body = {
             id_menu: id_menu
@@ -264,6 +172,10 @@ const Det_menu = () => {
 
         if (opc) {
             body.opcional = opc;
+        }
+
+        if (ele) {
+            body.elegir = ele;
         }
 
         console.log(body);
@@ -305,6 +217,18 @@ const Det_menu = () => {
         }
     }
 
+    const elegirEntre = (evento, id) => {
+
+        console.log(resta);
+        let opc = evento.target.checked ? 'S' : 'N';
+
+        setElegir({
+            ...resta,
+            [id]: opc
+        });
+
+    }
+
     const articulOpcional = (evento, id) => {
 
         console.log(resta);
@@ -315,11 +239,7 @@ const Det_menu = () => {
             [id]: opc
         });
 
-
     }
-
-
-
 
     return (
         <div className='articulos__articulos'>
@@ -353,7 +273,6 @@ const Det_menu = () => {
                                         <li className='menu__item'>
                                             <span className='item__title'>Opcional?</span>
                                         </li>
-
                                     </ul>
 
                                     <div className='detmenu__list'>
@@ -410,28 +329,6 @@ const Det_menu = () => {
                     </div>
                 </section>
             </section>
-
-            <div className='articulos__articulos'>
-                <section className='articulos__container'>
-                    <header className='articulo_headers'>
-                        <span className='title__color--title'>Hamburguesas del menu</span>
-                    </header>
-                </section>
-
-                <div>
-                    {opcionesHamburguesa.length > 0 && opcionesHamburguesa.map((opcion, index) => {
-                        return (
-                            <article className='menu__article' key={index}>
-                                <span className='select__opcion'>{opcion.name}</span>
-                                <span><FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' onClick={() => eliminarHamburguesa(opcion.id)} /></span>
-                            </article>
-                        )
-                    })
-
-                    }
-                </div>
-            </div>
-
             <div className='articulos__articulos'>
 
                 <section className='articulos__container'>
@@ -453,33 +350,6 @@ const Det_menu = () => {
                                 />
                             </div>
 
-                            <div className='content__field--menu'>
-                                <label htmlFor="contable" className='label__form'>Incluye hamburguesa?</label>
-                                <input type="checkbox" name='hamburguesa' id='hamburguesa' onChange={(e) => setHamburguesa(e.target.checked ? 'S' : 'N')} />
-                            </div>
-
-                            {hamburguesa == 'S' &&
-
-                                <div>
-
-                                    <Multiselect
-                                        options={hamburguesas} // Opciones para mostrar en el dropdown
-                                        selectedValues={opcionesSeleccionadasHam} // Valores preseleccionados
-                                        onSelect={onSelectHam} // Función que se activará al seleccionar un elemento
-                                        onRemove={onRemoveHam} // Función que se activará al eliminar un elemento
-                                        displayValue="name" // Propiedad del objeto a mostrar en el dropdown
-                                    />
-
-                                    <div className='content__field--menu'>
-                                        <label htmlFor="contable" className='label__form'>Cantidad de hamburguesa?</label>
-                                        <input type="text" name='cantidad_hamburguesa' id='cantidad_hamburguesa' onChange={(e) => setCantidadHamburguesa(e.target.value)} />
-                                    </div>
-
-                                </div>
-
-                            }
-
-
                         </form>
 
                     </section>
@@ -490,4 +360,4 @@ const Det_menu = () => {
     )
 }
 
-export default Det_menu
+export default Det_hamburguesa

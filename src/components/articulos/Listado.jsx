@@ -13,6 +13,7 @@ const Listado = () => {
     const [artmanual, setArtManual] = useState([]);
     const [articuloAct, setArticuloAct] = useState({});
     const [idsParaActualizar, setIdsParaActualizar] = useState([]);
+    const { form, changed } = useForm({});
 
     useEffect(() => {
 
@@ -126,7 +127,7 @@ const Listado = () => {
 
             <section className="card__general">
 
-                <section className='title_menu'>
+                <div className='title_menu'>
 
                     <form className='form_articulo' onSubmit={ActualizarArticulo}>
 
@@ -204,7 +205,7 @@ const Listado = () => {
                         </div>
 
                     </form>
-                </section>
+                </div>
             </section>
         </div>
     )

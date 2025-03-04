@@ -10,6 +10,8 @@ const Menu = () => {
   const [lista, setLista] = useState("");
   const [menus, setMenus] = useState([]);
   const { form, changed } = useForm({});
+  const [hamburguesa, setHamburguesa] = useState(false);
+
 
   let token = localStorage.getItem('token');
 
@@ -23,8 +25,8 @@ const Menu = () => {
 
   const listar = async () => {
     let sucursal = 1;
-
-    const request = await fetch(Global.url + 'menu/list/' + sucursal, {
+    
+    const request = await fetch(Global.url + 'menu/list/' + sucursal +'/N', {
       method: "GET",
       headers: {
         "authorization": token,
@@ -55,10 +57,18 @@ const Menu = () => {
 
   }
 
+  const crearHamburguesa = (idmenu, nombre) => {
+
+    navigate('/rousse/crear-hamburguesa');
+
+  }
+
   const CrearMenu = async (e) => {
     e.preventDefault();
 
     let body = form;
+
+    body.hamburguesa = 'N';
 
     if (body.price == 0 || isNaN(body.price)) {
       console.log('debe ingresar un numero valido');
@@ -83,6 +93,7 @@ const Menu = () => {
 
 
   }
+
 
   const eliminar = async (idmenu) => {
 
@@ -159,6 +170,17 @@ const Menu = () => {
               </form>
 
             </section>
+
+          </section>
+        </div>
+
+        <div className='articulos__articulos'>
+
+          <section className='articulos__container'>
+
+            <header className='articulo_headers'>
+              <span className='title__color--title' onClick={()=> crearHamburguesa()}>Agrega hamburguesa</span>
+            </header>
 
           </section>
         </div>

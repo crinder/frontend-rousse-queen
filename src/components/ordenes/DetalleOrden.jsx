@@ -1,8 +1,9 @@
-import { React, useEffect, useState } from 'react'
+import { React, useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import Global from '../../helpers/Global';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Select from 'react-select';
 
 
 const DetalleOrden = () => {
@@ -13,15 +14,15 @@ const DetalleOrden = () => {
     const [orden, setOrden] = useState();
     const [menu, setMenu] = useState();
     const [extras, setExtras] = useState();
-    const [qingredientes, setQingredientes] = useState();
+    const [qingredientes, setQingredientes] = useState([]);
     const [aingredientes, setAingredientes] = useState();
+    const [descripDelivery, setDescripDelivery] = useState();
     const [show, setShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [numitem, setNumitem] = useState(1);
-    const [observation, setObservation] = useState();
+    const [id_orden, setId_orden] = useState();
+    const [observation, setObservation] = useState({});
+    const [textAreaValues, setTextAreaValues] = useState({});
     const [adicional, setAdicional] = useState();
-    const [Q_checbox, setQ_checbox] = useState(false);
-    const [A_checbox, setA_checbox] = useState(false);
     const [checkPago, setCheckPago] = useState(false);
     const [tiporden, setTiporden] = useState({});
     const [ordenType, setOrdenType] = useState(1);
@@ -33,10 +34,79 @@ const DetalleOrden = () => {
     const [total, setTotal] = useState(0);
     const [listDelivery, setListDelivery] = useState('');
     const [idDelivery, setIdDelivery] = useState('');
+    const [hamburguesaSelected, setHamburguesaSelected] = useState();
+    const [maxCantidadHamburguesa, setMaxCantidadHamburguesa] = useState(0);
+    const [selectedHamburguesa, setSelectedHamburguesa] = useState([]);
+    const [qingredientesHamburguesa, setQingredientesHamburguesa] = useState([]);
+    const [eIngredienteHamburguesa, setEIngredienteHamburguesa] = useState([]);
+    const [checkedItems, setCheckedItems] = useState([]);
+    const [cursorPos, setCursorPos] = useState({ start: 0, end: 0 });
+
+
+    const Seccion = ({ key, indexQ, id_menu, setObservation, observation, cursorPos, setCursorPos }) => {
+        const textareaRef = useRef(null);
+
+
+        const handleTextAreaChange = (itemKey, innerArrayIndex, event) => {
+            const { value, selectionStart, selectionEnd } = event.target;
+
+            setCursorPos(prev => ({
+                ...prev,
+                [`${itemKey}-${innerArrayIndex}`]: { start: selectionStart, end: selectionEnd }
+            }));
+
+            setObservation(prevValues => {
+                const newValues = { ...prevValues };
+                if (!newValues[itemKey]) {
+                    newValues[itemKey] = {};
+                }
+                newValues[itemKey][innerArrayIndex] = value;
+
+                return newValues;
+            });
+        };
+
+        useEffect(() => {
+            if (textareaRef.current && cursorPos[`${indexQ}-${id_menu}`]) {
+                const { start, end } = cursorPos[`${indexQ}-${id_menu}`];
+                textareaRef.current.setSelectionRange(start, end);
+                textareaRef.current.focus();
+            }
+        }, [cursorPos, indexQ, id_menu]);
+
+        return (
+            <div>
+                <div className='observacion__ingredientes'>
+                    <div className='modal__subtitle centrar'>
+                        <span className='subtitle__modal'>Observaciones</span>
+                    </div>
+
+                    <textarea
+                        ref={textareaRef}
+                        className='ingredientes__input'
+                        onChange={(event) => handleTextAreaChange(indexQ, id_menu, event)}
+                        placeholder='Ingrese las observaciones'
+                        value={observation?.[indexQ]?.[id_menu] || ""}
+                        id={`textarea-${indexQ}-${id_menu}`}
+                    />
+                </div>
+
+            </div>
+        );
+    };
 
 
     const handleClose = () => setShow(false);
+
     const handleShow = (item) => {
+
+        const cantidad = {
+            [item.id_menu._id]: item.id_menu.cantidad_hamburguesa
+        }
+
+        setId_orden(item._id);
+
+        setMaxCantidadHamburguesa(cantidad);
         setSelectedItem(item);
         setShow(true);
     }
@@ -44,20 +114,37 @@ const DetalleOrden = () => {
     const actualizarA = async (e, id_menu) => {
         e.preventDefault();
 
+        let id_det_orden = id_orden;
+
         let body = {
             id_menu: id_menu,
             observacion: observation,
             qingredientes: qingredientes,
-            aingredientes: aingredientes
+            qingredientes: eIngredienteHamburguesa,
+            hamburguesa: selectedHamburguesa
         }
 
-        setAdicional({
-            ...adicional,
-            [id_menu]: body
+        const request = await fetch(Global.url + 'det-orden/update/' + id_det_orden, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "Content-type": 'application/json',
+                "authorization": token
+            }
         });
 
-        handleClose();
+        //limpiarEstados();
 
+        //handleClose();
+
+    }
+
+    const limpiarEstados = () => {
+        setObservation({});
+        setQingredientes([]);
+        setAingredientes([]);
+        setSelectedHamburguesa([]);
+        setEIngredienteHamburguesa([]);
     }
 
     const buscarOrden = async (id) => {
@@ -72,13 +159,41 @@ const DetalleOrden = () => {
         const data = await request.json();
 
         if (data.status == "success") {
-            setOrden(data.ordens);
-            setTotal(data.ordens[0].total);
+            setOrden(data.detalle);
+            setTotal(data.ordens.total);
+
+            //setCantidadHamburguesa(data.ordens[0].items[0].cantidad_hamburguesa);
         } else {
             console.log('error');
         }
     }
 
+    const devuelveDethamburguesa = async (elemento) => {
+
+        const c_body = {
+            id: elemento
+        }
+
+        const request = await fetch(Global.url + 'det-menu/ingredientesHamburguesa/', {
+            method: "POST",
+            body: JSON.stringify(c_body),
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await request.json();
+
+        if (data.status == "success") {
+
+            console.log(data.listas);
+
+            setQingredientesHamburguesa(data.listas);
+
+        }
+
+    }
 
     const nombreCli = (event) => {
 
@@ -95,6 +210,7 @@ const DetalleOrden = () => {
         const tipo = event.target.value;
 
         setOrdenType(tipo);
+        setMdelivery(0);
 
         if (tipo == 1) {
             setNombre('En mesa');
@@ -102,11 +218,10 @@ const DetalleOrden = () => {
             setNombre('');
         }
 
-
     }
 
     useEffect(() => {
-        if (ordenType == 4) {
+        if (ordenType == 4 || ordenType != 1 && changeCheck) {
             devuelveListDelivery();
         }
 
@@ -125,19 +240,25 @@ const DetalleOrden = () => {
         const data = await request.json();
 
         if (data.status == "success") {
-            setListDelivery(data.deliveryList);
+
+            const delivery = data.deliveryList.map(delivery => {
+                return {
+                    value: delivery._id,
+                    label: delivery.zona + ' ' + delivery.cost_delivery + '$'
+                }
+            });
+
+
+            setDescripDelivery(data.deliveryList);
+            setListDelivery(delivery);
         }
     }
 
-    const changedDelivery = (id) => {
+    const changedDelivery = (options) => {
 
-        console.log(id);
-
-        const coste = listDelivery.find(delivery => delivery._id == id);
-
+        setIdDelivery(options)
+        const coste = descripDelivery.find(delivery => delivery._id == options.value);
         setMdelivery(coste.cost_delivery);
-        setIdDelivery(id);
-
 
     }
 
@@ -145,9 +266,7 @@ const DetalleOrden = () => {
 
         let idMenus = [];
         orden.map(item => {
-            item.items.map(item => {
-                idMenus.push(item.id_menu);
-            })
+            idMenus.push(item.id_menu._id);
         });
 
         let body = {
@@ -175,8 +294,14 @@ const DetalleOrden = () => {
                 return item.listExtra;
             });
 
+            let hamburguesas = data.listas.map(item => {
+                return item.hamburguesaSelected;
+            });
+
             setMenu(listArticle);
             setExtras(listExtra);
+            setHamburguesaSelected(hamburguesas);
+
 
         } else {
             console.log('error');
@@ -188,9 +313,15 @@ const DetalleOrden = () => {
     }, []);
 
     useEffect(() => {
-        devuelveTipo();
-        buscarDetMenu();
+        if (orden) {
+            devuelveTipo();
+            buscarDetMenu();
+        }
     }, [orden]);
+
+    useEffect(() => {
+        console.log(eIngredienteHamburguesa);
+    }, [eIngredienteHamburguesa]);
 
     const devuelveTipo = async () => {
 
@@ -214,81 +345,66 @@ const DetalleOrden = () => {
 
         if (dataPago.status == "success") {
             setTiporden(dataPago.findStored);
-
         }
 
     }
 
-    const quitarIngredientes = (evento, id, menu, description) => {
+    useEffect(() => {
+        //console.log(checkedItems);
+    }, [checkedItems]);
 
-        let opc = evento.target.checked ? 'S' : 'N';
 
-        if (aingredientes && aingredientes.hasOwnProperty(id)) {
+    useEffect(() => {
+        updateTextArea();
+    }, [checkedItems]);
 
-            alert('No puedes quitar ' + description + ' porque esta como un extra');
-            setQ_checbox({
-                ...Q_checbox,
-                [id]: false
-            });
+    const updateTextArea = () => {
+        const newTextAreaValues = {}; // Reiniciar los valores del textarea
 
-        } else {
-            setQingredientes({
-                ...qingredientes,
-                [id]: {
-                    id_menu: menu,
-                    opc: opc,
-                    id_article: id,
-                    item: numitem,
-                    description: description
+        for (const itemKey in checkedItems) {
+            newTextAreaValues[itemKey] = newTextAreaValues[itemKey] || {}; // Inicializar el objeto para este item
+
+            for (const innerArrayIndex in checkedItems[itemKey]) {
+                let itemText = "";
+                for (const elementId in checkedItems[itemKey][innerArrayIndex]) {
+                    if (checkedItems[itemKey][innerArrayIndex][elementId].checked) {
+                        itemText += `Sin ${checkedItems[itemKey][innerArrayIndex][elementId].name}`;
+                    }
                 }
-            });
-
-            setQ_checbox({
-                ...Q_checbox,
-                [id]: true
-            });
+                newTextAreaValues[itemKey][innerArrayIndex] = itemText; // Guardar el texto para este textarea
+            }
         }
 
+        setTextAreaValues(newTextAreaValues);
+    };
 
-    }
+    const quitarIngredientes = (evento, id, menu, indexQ) => {
 
-    const addIngredientes = (evento, id, menu, description) => {
-        let opc = evento.target.checked ? 'S' : 'N';
 
-        if (qingredientes && qingredientes.hasOwnProperty(id)) {
+        const isChecked = evento.target.checked;
 
-            alert('No puedes agregar ' + description + ' porque esta marcado para quitar');
-            setA_checbox({
-                ...A_checbox,
-                [id]: false
-            });
+        setQingredientes(prevState => {
+            const updatedState = { ...prevState };
 
-        } else {
-            setAingredientes({
-                ...aingredientes,
-                [id]: {
-                    id_menu: menu,
-                    opc: opc,
-                    id_article: id,
-                    item: numitem,
-                    description: description
-                }
-            });
+            if (!prevState[menu]) updatedState[menu] = [];
+            if (!prevState[menu]?.[indexQ]) updatedState[menu][indexQ] = [];
 
-            setA_checbox({
-                ...A_checbox,
-                [id]: true
-            });
-        }
+            if (isChecked) {
+                updatedState[menu][indexQ].push(id);
 
-    }
+            } else {
+                updatedState[menu][indexQ] = updatedState[menu][indexQ].filter(item => item != id);
 
-    const actualizzaObservacion = (id) => (evento) => {
-        setObservation({
-            ...observation,
-            [id]: evento.target.value
+            }
+
+            return updatedState;
         });
     }
+
+    useEffect(() => {
+        console.log(qingredientes)
+    }, [qingredientes]);
+
 
     const actualizaDetalle = async () => {
 
@@ -299,7 +415,9 @@ const DetalleOrden = () => {
         };
 
         if (ordenType == 4) {
-            body.delivery = idDelivery;
+            const id_del = descripDelivery.find(delivery => delivery._id == idDelivery.value);
+
+            body.delivery = id_del;
             body.cost_delivery = mdelivery;
         } else {
             body.cost_delivery = 0;
@@ -320,7 +438,6 @@ const DetalleOrden = () => {
             const data = await request.json();
 
             if (data.status == "success") {
-                console.log('success');
 
                 let body = adicional;
 
@@ -334,7 +451,6 @@ const DetalleOrden = () => {
                             "authorization": token
                         }
                     });
-
 
                     const data = await request.json();
 
@@ -355,168 +471,208 @@ const DetalleOrden = () => {
         
                 }*/
             }
-
         }
-
     }
 
     const actualizarOrden = async (e) => {
-
         e.preventDefault();
-
         actualizaDetalle();
-
-
-
     }
 
+    useEffect(() => {
+        console.log(eIngredienteHamburguesa);
+    }, [eIngredienteHamburguesa]);
 
+    const handleCheckboxIngredientes = (evento, indexQ, index, idmenu, id_article) => {
+
+        const idHamburguesa = evento.target.value;
+        const isChecked = evento.target.checked;
+
+        setEIngredienteHamburguesa(prevState => {
+            const updatedState = { ...prevState };
+
+            if (!prevState[idmenu]) updatedState[idmenu] = [];
+            if (!prevState[idmenu]?.[indexQ]) updatedState[idmenu][indexQ] = [];
+
+            if (isChecked) {
+                updatedState[idmenu][indexQ].push(id_article);
+
+            } else {
+                updatedState[idmenu][indexQ] = updatedState[idmenu][indexQ].filter(item => item != id_article);
+            }
+
+            return updatedState;
+        });
+    };
+
+
+    const handleCheckboxChange = (evento, items, index, idmenu) => {
+        const idHamburguesa = evento.target.value;
+        const isChecked = evento.target.checked;
+
+        setSelectedHamburguesa(prevState => {
+            const updatedState = { ...prevState };
+
+            if (!prevState[idmenu]) updatedState[idmenu] = [];
+            if (!prevState[idmenu]?.[items]) updatedState[idmenu][items] = [];
+
+            if (isChecked) {
+                updatedState[idmenu][items].push(idHamburguesa);
+                if (updatedState[idmenu][items].length > maxCantidadHamburguesa[idmenu]) {
+                    updatedState[idmenu][items].pop(); // Eliminar la última hamburguesa agregada
+                    console.log(`No puedes seleccionar más de ${maxCantidadHamburguesa[idmenu]} hamburguesas`);
+                    evento.target.checked = false;
+                }
+            } else {
+                updatedState[idmenu][items] = updatedState[idmenu][items].filter(item => item != idHamburguesa);
+
+                if (eIngredienteHamburguesa[idmenu]?.[items].length > 0) {
+                    setEIngredienteHamburguesa(prevMap => {
+                        const updatedMap = { ...prevMap };
+                        delete updatedMap[idmenu][items];
+                        return updatedMap;
+                    });
+                }
+
+
+            }
+
+            return updatedState;
+        });
+    };
 
     return (
-        <div className='orden__crear orden__detalle'>
+        <div className='orden__crear orden__detalle orden--ampliar'>
+            <div className="form-check form-switch totales">
+                <span>Total: {total}</span>
 
-            <section className='crear__content detmenu__section'>
+                {(mdelivery > 0 && ordenType != 1) &&
+                    <span>Total con delivery: {total + parseInt(mdelivery)}</span>
+                }
+
+            </div>
+
+            <section className='crear__content detmenu__section '>
+
                 <form className='crear__orden' onSubmit={evento => actualizarOrden(evento)}>
 
+                    <div className='sections__menu'>
+                        {orden && orden.map(item => {
 
+                            return (
+                                <section key={item._id} className='detalle__menu detalle__menu--detalle'>
+                                    <Button variant="primary" onClick={() => handleShow(item)} className='button__detalle title__color--subtitle'>
+                                        <span className=''>{item.id_menu.description} </span>
+                                    </Button>
+                                </section>
+                            )
 
-                    {orden && orden.map(item => {
-                        return (
-                            <div className='ordenes__container'>
-                                {item.items.map(item => {
-                                    return (
-                                        <section key={item._id} className='detalle__menu detalle__menu--detalle'>
-                                            <Button variant="primary" onClick={() => handleShow(item)} className='button__detalle'>
-                                                <span className='title__color--subtitle'>{item.description} </span>
-                                            </Button>
+                        })
 
-                                        </section>
-                                    )
-                                }
-                                )}
-                                <div className='total__sticky'>
-                                    <span className='title__color--subtitle '>Total: {total}$</span>
-                                </div>
-
-                            </div>
-                        )
-                    })}
+                        }
+                    </div>
 
                     {selectedItem && (
-                        <Modal show={show} onHide={handleClose} >
+                        <Modal show={show} onRequestClose={() => { }} // Evita el cierre con Esc
+                            shouldCloseOnOverlayClick={false} // Evita el cierre al hacer clic fuera 
+                        >
+
                             <Modal.Header closeButton className='modal__detalle'>
-                                <Modal.Title className='modal__detalle'>{selectedItem.description} cantidad: {selectedItem.quantity}</Modal.Title>
+                                <Modal.Title className='modal__detalle'>{selectedItem.id_menu.description} cantidad: {selectedItem.quantity}</Modal.Title>
                             </Modal.Header>
                             <Modal.Body className='modal__detalle'>
-
-                                <div className='modal__title'>
-                                    <div className='modal__select'>
-                                        <select className='select__cantidad' defaultValue={selectedItem.quantity} onChange={evento => (setNumitem(evento.target.value))}>
-                                            {[...Array(selectedItem.quantity).keys()].map(index => (
-                                                <option key={index + 1} value={index + 1}>{index + 1}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className='modal__subtitle'>
-                                        <span className='subtitle__modal'>Quitar ingredientes?</span>
-                                    </div>
-                                </div>
-
-
-
-                                {menu && menu.map(q_ing => {
-                                    return (
-                                        <div key={q_ing._id} className='detalle__menu detalle__menu--detalle modal__ingredientes'>
-                                            {q_ing.map && q_ing.map(ing => {
-                                                if (ing.idmenu == selectedItem.id_menu) {
-                                                    return (
-                                                        <div key={ing._id} className='ingredientes__detalle'>
-                                                            <span className='title__subtitle--subtitle center'>
-                                                                <input type="checkbox" checked={Q_checbox[ing._id] || false}
-                                                                    className='checkbox__ingredientes'
-                                                                    onChange={(evento) => quitarIngredientes(evento, ing._id, selectedItem.id_menu, ing.name_article)}
-                                                                />
-                                                                {ing.name_article}
-                                                            </span>
-                                                        </div>
-                                                    )
-                                                }
-                                            })}
-                                        </div>
-                                    )
-                                })}
-
-                                <div className='modal__subtitle centrar'>
-                                    <span className='subtitle__modal'>Añadir ingredientes?</span>
-                                </div>
-
-                                {extras && extras.map(a_ing => {
-
-                                    return (
-                                        <div key={a_ing._id} className='detalle__menu detalle__menu--detalle modal__ingredientes'>
-                                            {a_ing.map && a_ing.map(ing => {
-                                                if (ing.idmenu == selectedItem.id_menu) {
-                                                    return (
-                                                        <div key={ing._id} className='ingredientes__detalle'>
-                                                            <span className='title__subtitle--subtitle center'>
-                                                                <input
-                                                                    className='checkbox__ingredientes'
-                                                                    type="checkbox"
-                                                                    checked={A_checbox[ing._id] || false}
-                                                                    onChange={(evento) => addIngredientes(evento, ing._id, selectedItem.id_menu, ing.name_article)}
-                                                                />
-                                                                {ing.name_article}
-                                                            </span>
-                                                        </div>
-                                                    )
-                                                }
-                                            })
-                                            }
-
-                                        </div>
-                                    )
-                                }
-                                )}
-
-                                <div className='observacion__ingredientes'>
-                                    <div className='modal__subtitle centrar'>
-                                        <span className='subtitle__modal'>Observaciones</span>
-                                    </div>
-
-                                    <textarea className='ingredientes__input' placeholder='Ingrese las observaciones' onChange={actualizzaObservacion(selectedItem.id_menu)}></textarea>
-                                </div>
-
-                                <div className='modal__ingredientes--adicional'>
-
-                                    {qingredientes && Object.values(qingredientes).map(q_ing => {
-
-
-                                        if (q_ing.id_menu == selectedItem.id_menu) {
+                                {[...Array(selectedItem.quantity).keys()].map(indexQ => (
+                                    <div>
+                                        {menu && menu.map(q_ing => {
                                             return (
-                                                <div className='ingredientes__adicional'>
-
-                                                    <span>{q_ing.item}</span> <span>{selectedItem.description} sin {q_ing.description}</span> </div>
+                                                <div key={q_ing._id} className='detalle__menu detalle__menu--detalle modal__ingredientes'>
+                                                    {q_ing.map && q_ing.map(ing => {
+                                                        if (ing.idmenu == selectedItem.id_menu._id) {
+                                                            return (
+                                                                <div key={ing._id} className='ingredientes__detalle'>
+                                                                    <span className='title__subtitle--subtitle center'>
+                                                                        <input type="checkbox"
+                                                                            className='checkbox__ingredientes'
+                                                                            onChange={(evento) => quitarIngredientes(evento, ing._id, selectedItem.id_menu._id, indexQ)}
+                                                                            checked={qingredientes[selectedItem.id_menu._id]?.[indexQ]?.includes(ing._id) || false}
+                                                                        />
+                                                                        {ing.name_article}
+                                                                    </span>
+                                                                </div>
+                                                            )
+                                                        }
+                                                    })}
+                                                </div>
                                             )
-                                        }
+                                        })}
 
-                                    })}
-
-                                    {aingredientes && Object.values(aingredientes).map(a_ing => {
-
-                                        if (a_ing.id_menu == selectedItem.id_menu) {
+                                        {hamburguesaSelected && hamburguesaSelected.map((hambur, index2) => {
                                             return (
-                                                <div className='ingredientes__adicional'>
+                                                <div key={hambur._id} className='detalle__menu detalle__menu--detalle modal__ingredientes'>
 
-                                                    <span>{a_ing.item}</span> <span>{selectedItem.description} sin {a_ing.description}</span> </div>
+                                                    {hambur.map && hambur.map((hamburguesa, index) => {
+                                                        if (hamburguesa.idmenu == selectedItem.id_menu._id) {
+                                                            return (
+                                                                <div key={hamburguesa._id} className='ingredientes__detalle'>
+                                                                    <span className='title__subtitle--subtitle center'>
+                                                                        <input type="checkbox" className='checkbox__ingredientes'
+                                                                            onChange={(evento) => handleCheckboxChange(evento, indexQ, index, selectedItem.id_menu._id)}
+                                                                            value={hamburguesa._id}
+                                                                            checked={selectedHamburguesa[selectedItem.id_menu._id]?.[indexQ]?.includes(hamburguesa._id) || false}
+                                                                        />
+                                                                        {hamburguesa.description}
 
+                                                                    </span>
+
+                                                                </div>
+
+
+                                                            )
+                                                        }
+                                                    })}
+
+                                                    {hambur.map && hambur.map((hamburguesa, index) => {
+                                                        if (hamburguesa.idmenu == selectedItem.id_menu._id && selectedHamburguesa[selectedItem.id_menu._id]?.[indexQ]?.includes(hamburguesa._id)) {
+                                                            return (
+                                                                <div key={hamburguesa._id} className='section__ingredientes'>
+                                                                    <span className='title__subtitle--subtitle centrar'> Quitar ingredientes </span>
+
+                                                                    {
+                                                                        hamburguesa.id_hamburguesa &&
+                                                                        <div className='ingredientes__adicional'>
+                                                                            {hamburguesa.id_hamburguesa.map(hamb => {
+                                                                                return (
+                                                                                    <div className=''>
+                                                                                        <input type="checkbox" className='checkbox__ingredientes-adicionales'
+                                                                                            onChange={(evento) => handleCheckboxIngredientes(evento, indexQ, index, selectedItem.id_menu._id, hamb.id_article._id)}
+                                                                                            value={hamburguesa._id}
+                                                                                            checked={eIngredienteHamburguesa[selectedItem.id_menu._id]?.[indexQ]?.includes(hamb.id_article._id) || false}
+                                                                                        />
+                                                                                        <span className='ingredientes-adicionales--descripcion'>{hamb.id_article.name_article}</span>
+
+                                                                                    </div>
+                                                                                )
+                                                                            })}
+
+                                                                        </div>
+                                                                    }
+
+                                                                </div>
+
+
+                                                            )
+                                                        }
+                                                    })}
+
+                                                </div>
                                             )
-                                        }
 
-                                    })}
+                                        })}
 
-                                </div>
+                                        <Seccion key={indexQ} indexQ={indexQ} id_menu={selectedItem.id_menu._id} setObservation={setObservation} observation={observation} cursorPos={cursorPos} setCursorPos={setCursorPos} />
+                                    </div>
 
-
+                                ))}
 
 
                             </Modal.Body>
@@ -524,7 +680,7 @@ const DetalleOrden = () => {
                                 <Button onClick={handleClose} className='modal__detalle modal__button'>
                                     Cerrar
                                 </Button>
-                                <Button className='modal__detalle modal__button' onClick={evento => actualizarA(evento, selectedItem.id_menu)}>
+                                <Button className='modal__detalle modal__button' onClick={evento => actualizarA(evento, selectedItem.id_menu._id)}>
                                     Guardar
                                 </Button>
                             </Modal.Footer>
@@ -532,11 +688,9 @@ const DetalleOrden = () => {
                     )}
 
                     <div className='container__detalle'>
-
                         <div className='detalle__section'>
                             <label className="user__label--orden" htmlFor="user">Tipo de orden</label>
                             <select name="orderType" className="user__input--orden select__tipo" onChange={tipoOrden}>
-
                                 {tiporden.length > 0 && tiporden.map(orden => {
                                     return (
                                         <option value={orden.code} key={orden.code}>{orden.descrip}</option>
@@ -546,7 +700,6 @@ const DetalleOrden = () => {
                         </div>
 
                         <div className='detalle__section content__field--menu'>
-
                             <input type="text" name='name' id='name' className='input__form--menu input__control' placeholder=' ' onChange={nombreCli} required value={nombre} />
                             <label htmlFor="user" className='input__label '>Nombre</label>
                         </div>
@@ -562,15 +715,16 @@ const DetalleOrden = () => {
                         </div>
 
                         <div className='detalle__section'>
-                            {(changeCheck && ordenType != 1 || ordenType == 4) &&
+                            {(changeCheck && ordenType != 1) &&
 
-                                <select name="delivery" className="user__input--orden" onChange={evento => changedDelivery(evento.target.value)}>
-                                    {listDelivery && listDelivery.map(delivery => {
-                                        return (
-                                            <option key={delivery._id} value={delivery._id}>{delivery.zona + ' ' + delivery.cost_delivery + '$'}</option>
-                                        )
-                                    })}
-                                </select>
+                                <Select name="delivery" className="user__input--orden"
+                                    onChange={changedDelivery}
+                                    options={listDelivery}
+                                    isSearchable={true}
+                                    value={idDelivery}
+                                >
+
+                                </Select>
 
                             }
                         </div>
@@ -580,13 +734,11 @@ const DetalleOrden = () => {
                             <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Pago inmediato?</label>
                         </div>
 
+
+
                     </div>
 
-
-
-
                     <input type="submit" className="user__button" value="Confirmar" />
-
                 </form>
             </section>
         </div >

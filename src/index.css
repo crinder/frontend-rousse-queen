@@ -757,6 +757,7 @@ body {
   margin-top: 3rem;
   margin-bottom: 5rem;
   padding: 3rem;
+  width: 100%;
 }
 
 
@@ -863,6 +864,10 @@ body {
   margin-top: 4rem;
 }
 
+.orden--ampliar{
+  width: 70%;
+}
+
 
 .orden__det {
   display: flex;
@@ -880,6 +885,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .menu__article {
@@ -1125,13 +1131,6 @@ body {
   margin-left: 0px;
 }
 
-.detalle__menu {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
 .center {
   margin: 0 auto;
 }
@@ -1247,6 +1246,7 @@ tr:hover {
 }
 
 .button__detalle {
+  margin-right: 1rem;
   background-color: var(--color-secundary);
   border-color: var(--color-principal);
   transition: all 300ms ease-in-out;
@@ -1330,9 +1330,6 @@ tr:hover {
   color: var(--color-secundary);
 }
 
-.ingredientes__detalle {
-  width: 50%;
-}
 
 .centrar {
   text-align: center;
@@ -1371,17 +1368,53 @@ tr:hover {
   color: var(--color-secundary);
 }
 
+.section__ingredientes{
+  width: 100%;
+  margin-top: 2rem;
+  
+}
+
 .ingredientes__adicional {
-  margin-left: 8rem;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--color-secundary);
-  justify-content: space-around;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+}
+
+.checkbox__ingredientes-adicionales{
+  margin: 1rem;  
+}
+
+.ingredientes-adicionales--descripcion{
+  font-size: 1.7rem;
+  margin-right: 1rem;
+  font-weight: 500;
+}
+
+.border__separador{
+  width: 80%;
+  margin: 0 auto;
+  border-top: 1px solid var(--color-secundary);
+  margin-bottom: 1rem;
 }
 
 .select__tipo {
-  background-color: transparent;
+  background-color: var(--color-principal);
   border: 0.2rem solid var(--color-principal);
   color: var(--color-secundary);
-  background: var(--color-principal);
+  background: transparent;
+}
+
+.sections__menu {
+  display: flex;
+  flex-wrap: wrap;
+  width: 70%;
+  justify-content: center;
+  align-items: center;
+}
+
+.totales{
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  font-size: 4rem;
 }

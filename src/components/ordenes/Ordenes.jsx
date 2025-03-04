@@ -109,7 +109,7 @@ const Ordenes = () => {
 
     const devuelveMenu = async () => {
 
-        const requestMenu = await fetch(Global.url + 'menu/list/' + 1, {
+        const requestMenu = await fetch(Global.url + 'menu/list/' + 1+'/N', {
 
             method: "GET",
             headers: {

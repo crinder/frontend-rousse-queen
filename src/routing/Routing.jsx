@@ -13,7 +13,6 @@ import Success from '../components/private/Success';
 import List_ordenes from '../components/ordenes/List_ordenes';
 import Config from '../components/config/Config';
 import Caja from '../components/config/Caja';
-import Crear_menu from '../components/menu/Crear_menu';
 import Articulos from '../components/articulos/Articulos';
 import Movimientos from '../components/movimientos/Movimientos';
 import OtrosPagos from '../components/movimientos/OtrosPagos';
@@ -23,6 +22,8 @@ import Listado from '../components/articulos/Listado';
 import Ordenes from '../components/ordenes/Ordenes';
 import Delivery from '../components/config/Delivery';
 import ListDelivery from '../components/config/ListDelivery';
+import Hamburguesas from '../components/menu/Hamburguesas';
+import Det_hamburguesa from '../components/menu/Det_hamburguesa';
 
 
 const Routing = () => {
@@ -40,7 +41,6 @@ const Routing = () => {
                             <Route path='home' element={<Home />}></Route>
                             <Route path='articulos' element={<Articulos />}></Route>
                             <Route path='menu' element={<Menu />}></Route>
-                            <Route path='crear-menu' element={<Crear_menu/>}></Route>
                             <Route path='detalle-menu' element={<Det_menu />}></Route>
                             <Route path='crear-orden' element={<CrearOrden />}></Route>
                             <Route path='pagar' element={<Pagar />}></Route>
@@ -56,6 +56,8 @@ const Routing = () => {
                             <Route path='crear-ordenes' element={<Ordenes/>}></Route>
                             <Route path='deliveries' element={<Delivery/>}></Route>
                             <Route path='list-deliveries' element={<ListDelivery/>}></Route>
+                            <Route path='crear-hamburguesa' element={<Hamburguesas/>}></Route>
+                            <Route path='detalle-hamburguesa' element={<Det_hamburguesa/>}></Route>
                         </Route>
                     </Routes>
                 </AuthProvider>
