@@ -24,6 +24,7 @@ import Delivery from '../components/config/Delivery';
 import ListDelivery from '../components/config/ListDelivery';
 import Hamburguesas from '../components/menu/Hamburguesas';
 import Det_hamburguesa from '../components/menu/Det_hamburguesa';
+import DetailOrden from '../components/ordenes/DetailOrden';
 
 
 const Routing = () => {
@@ -58,6 +59,7 @@ const Routing = () => {
                             <Route path='list-deliveries' element={<ListDelivery/>}></Route>
                             <Route path='crear-hamburguesa' element={<Hamburguesas/>}></Route>
                             <Route path='detalle-hamburguesa' element={<Det_hamburguesa/>}></Route>
+                            <Route path='detalles-ordenes' element={<DetailOrden/>}></Route>
                         </Route>
                     </Routes>
                 </AuthProvider>

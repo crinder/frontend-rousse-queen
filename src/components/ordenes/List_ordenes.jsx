@@ -3,8 +3,7 @@ import Global from '../../helpers/Global';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
-
-
+import { IconView } from '../Util/Iconos';
 
 const List_ordenes = () => {
 
@@ -13,8 +12,7 @@ const List_ordenes = () => {
     const [ordens, setOrdens] = useState([]);
     const [ordensPro, setOrdensPro] = useState([]);
     const [idsParaEliminar, setIdsParaEliminar] = useState([]);
-    const [saved,setSaved] = useState(false);
-  
+
     const toggleEliminar = (id) => {
         if (idsParaEliminar.includes(id)) {
             setIdsParaEliminar(idsParaEliminar.filter((idParaEliminar) => idParaEliminar !== id));
@@ -28,11 +26,11 @@ const List_ordenes = () => {
     }
 
     const eliminar = async (idOrden) => {
-        
 
-        const requestDel = await fetch(Global.url+'orden/delete-orden/'+idOrden,{
+
+        const requestDel = await fetch(Global.url + 'orden/delete-orden/' + idOrden, {
             method: 'DELETE',
-            headers:{
+            headers: {
                 "Content-Type": "application/json",
                 "authorization": token
             }
@@ -46,13 +44,13 @@ const List_ordenes = () => {
     }
 
     useEffect(() => {
-        const fecthOrden = async () =>  {
+        const fecthOrden = async () => {
 
             const ordenpen = await devuelveOrdenes('P'); // busco las pendiente
-            console.log('pendientes...',ordenpen);
+            console.log('pendientes...', ordenpen);
             setOrdens(ordenpen);
             const ordenPro = await devuelveOrdenes('S'); // busco las procesada
-            console.log('Procesada..',ordenPro);
+            console.log('Procesada..', ordenPro);
             setOrdensPro(ordenPro);
         }
 
@@ -60,20 +58,20 @@ const List_ordenes = () => {
     }, []);
 
     const devuelveOrdenes = async (ind) => {
-        
+
 
         let body = {
             status: 0
         }
 
-        if(ind == 'P'){
+        if (ind == 'P') {
             body.status = 1;
             setOrdens({});
-        }else{
+        } else {
             body.status = 2;
             setOrdensPro({});
         }
-        
+
 
         const request = await fetch(Global.url + 'orden/listOrdenes', {
             method: "POST",
@@ -87,17 +85,21 @@ const List_ordenes = () => {
         let data = await request.json();
 
         if (data.status == 'success') {
-            
-            if(ind == 'P'){
+
+            if (ind == 'P') {
                 return data.ordens;
-            }else{
+            } else {
                 return data.ordens;
             }
-           
+
         }
 
         console.log(data.ordens);
 
+    }
+
+    const detailOrden = (id) => {
+        navigate('/rousse/detalles-ordenes', { state: { idOrden: id } });
     }
 
     return (
@@ -111,25 +113,35 @@ const List_ordenes = () => {
                         <section key={index} className='ordens__group'>
 
                             <article className='group__article' onClick={() => clickPagar(list._id, list.total)}>
-                                <span>Nombre: {list.name}</span>
-                                <span>Tipo : {list.orderType}</span>
-                                <span>Total : {list.total}</span>
-                                <div className='orden__pedido'>
-                                    Pedido:
+                                <ul className='detalle__pedidos'>
+                                    <li className='list__detalles'><span className='tittle__span'>Nombre:</span> <span>{list.name}</span></li>
+                                    <li className='list__detalles'><span className='tittle__span'>Tipo : </span>  <span>{list.orderType}</span></li>
+                                    <li className='list__detalles'><span className='tittle__span'>Total : </span><span>{list.total}</span></li>
+                                </ul>
+
+                                <div className='orden__pedido pedidos_ordenes'>
+                                    {list.items && list.items.map((item, index) => {
+                                        return (
+                                            <div key={index} className='orden__pedidos'>
+                                                <span className='item__menu'>{item.description} cantidad: {item.quantity}</span>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
-                                {list.items && list.items.map((item, index) => {
-                                    return (
-                                        <div key={index}>
-                                            <span className='item__menu'>{item.description}</span>
-                                            <p className='item__menu'> cantidad: {item.quantity}</p>
-                                        </div>
-                                    )
-                                })}
+
                             </article>
 
-                            <div className="form-check form-switch">
-                                <input className="form-check-input" type="checkbox" role="switch" id={`flexSwitchCheckDefault${index}`} onChange={() => toggleEliminar(list._id)} />
-                                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Eliminar?</label>
+                            <div className="form-check form-switch icons_pedido">
+                                <div>
+                                    <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Eliminar?</label>
+                                    <input className="form-check-input" type="checkbox" role="switch" id={`flexSwitchCheckDefault${index}`} onChange={() => toggleEliminar(list._id)} />
+                                </div>
+
+                                <div>
+                                <IconView />
+                                    <span className="form-check-label"  onClick={ () => detailOrden(list._id) } >Detalle pedido</span>
+                                </div>
+
                             </div>
 
                             {idsParaEliminar.includes(list._id) && (

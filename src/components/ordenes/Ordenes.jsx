@@ -200,7 +200,6 @@ const Ordenes = () => {
 
                     <div className='option__menu'>
 
-
                         {opciones.length > 0 && opciones.map(opcion => {
                             return (
                                 <div className='menu__option'>
@@ -218,8 +217,6 @@ const Ordenes = () => {
                         }
 
                     </div>
-
-                    
 
                     <input type="submit" className="user__button" value="Crear Orden" disabled={activo} />
 

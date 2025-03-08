@@ -951,6 +951,11 @@ body {
   text-shadow: 0.1rem 0.1rem 1rem var(--color-secundary);
 }
 
+.title__descripcion{
+  font-size: 2rem;
+  text-shadow: 0.1rem 0.1px 1px var(--color-secundary);
+}
+
 .div__orden {
   text-align: center;
 }
@@ -1049,7 +1054,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
   border-radius: 3rem;
   border: 0.15rem solid var(--color-secundary);
   margin-top: 3rem;
@@ -1068,7 +1073,17 @@ body {
   opacity: 1;
 }
 
-.group__article {
+.group__article{
+  width: 90%;
+}
+
+.pedidos_ordenes{
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.ordens__group {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1077,6 +1092,50 @@ body {
   padding-bottom: 2rem;
 }
 
+.detalle__pedidos{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: start;
+}
+
+
+.list__ordens{
+  width: 80%;
+}
+
+.icons_pedido{
+  display: flex;
+  flex-direction: column;
+}
+
+.orden__pedidos{
+  border: 1px solid var(--color-secundary);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.extend__menu{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tittle__span{
+  font-weight: 600;
+}
+
+.descripcion__observacion{
+  margin-left: 1.5rem;
+}
+
+.item__menu--orden{
+  display: flex;
+  flex-direction: column;
+  justify-content: justify-content;
+  align-items: center;
+}
 
 .orden__pedido {
   border-top: 0.1rem solid var(--color-secundary);
@@ -1084,6 +1143,19 @@ body {
   padding-bottom: 1rem;
   padding-top: 1rem;
   margin-top: 1rem;
+}
+
+.grupo__pedido{
+  display: flex;
+  margin: 1rem;
+}
+
+.grupo__container{
+  padding: 1rem;
+}
+
+.grupo__menu{
+  margin-right: 2rem;
 }
 
 .div__caja {
