@@ -41,6 +41,10 @@ const DetalleOrden = () => {
     const [eIngredienteHamburguesa, setEIngredienteHamburguesa] = useState([]);
     const [checkedItems, setCheckedItems] = useState([]);
     const [cursorPos, setCursorPos] = useState({ start: 0, end: 0 });
+    const [arrayAlitas, setArrayAlitas] = useState([]);
+    const [tipoAlitas, setTipoAlitas] = useState(['Full picantes', 'Medio picantes', 'Poco picantes','Broster','Naturales']);
+    const [selectedAlitas, setSelectedAlitas] = useState([]);
+
 
 
     const Seccion = ({ key, indexQ, id_menu, setObservation, observation, cursorPos, setCursorPos }) => {
@@ -95,6 +99,10 @@ const DetalleOrden = () => {
         );
     };
 
+    useEffect(() => {
+        console.log(selectedAlitas);
+    }, [selectedAlitas]);
+
 
     const handleClose = () => setShow(false);
 
@@ -119,9 +127,10 @@ const DetalleOrden = () => {
         let body = {
             id_menu: id_menu,
             observacion: observation,
-            qingredientes: qingredientes,
+            qingre: qingredientes,
             qingredientes: eIngredienteHamburguesa,
-            hamburguesa: selectedHamburguesa
+            hamburguesa: selectedHamburguesa,
+            alitas: selectedAlitas
         }
 
         const request = await fetch(Global.url + 'det-orden/update/' + id_det_orden, {
@@ -161,6 +170,16 @@ const DetalleOrden = () => {
         if (data.status == "success") {
             setOrden(data.detalle);
             setTotal(data.ordens.total);
+
+            let array_alas = [];
+
+            data.detalle.map(item => {
+
+                item.id_menu.alitas == 'S' ? array_alas.push(item.id_menu._id) : null;
+            });
+
+            setArrayAlitas(array_alas);
+
 
             //setCantidadHamburguesa(data.ordens[0].items[0].cantidad_hamburguesa);
         } else {
@@ -460,8 +479,7 @@ const DetalleOrden = () => {
 
                 }
 
-                /*if (checkPago) {
-                    let idOrden = 'valor';
+                if (checkPago) {
         
                     navigate('/rousse/pagar', { state: { idOrden } });
         
@@ -469,7 +487,7 @@ const DetalleOrden = () => {
                     let valor = 1;
                     navigate('/rousse/success', { state: { valor } });
         
-                }*/
+                }
             }
         }
     }
@@ -505,6 +523,27 @@ const DetalleOrden = () => {
         });
     };
 
+    const handleAlitas = (evento, indexQ,idmenu) => {    
+        const isChecked = evento.target.checked;   
+        const alas = evento.target.value;
+        
+        setSelectedAlitas(prevState => {
+            const updatedState = { ...prevState };
+
+            if (!prevState[idmenu]) updatedState[idmenu] = [];
+            if (!prevState[idmenu]?.[indexQ]) updatedState[idmenu][indexQ] = [];
+
+            if (isChecked) {
+                updatedState[idmenu][indexQ].push(alas);
+
+            } else {
+                updatedState[idmenu][indexQ] = updatedState[idmenu][indexQ].filter(item => item != alas);
+            }
+
+            return updatedState;
+        });
+       
+    }
 
     const handleCheckboxChange = (evento, items, index, idmenu) => {
         const idHamburguesa = evento.target.value;
@@ -670,6 +709,22 @@ const DetalleOrden = () => {
                                         })}
 
                                         <Seccion key={indexQ} indexQ={indexQ} id_menu={selectedItem.id_menu._id} setObservation={setObservation} observation={observation} cursorPos={cursorPos} setCursorPos={setCursorPos} />
+                                       
+                                        {arrayAlitas.includes(selectedItem.id_menu._id) &&
+                                            <div className='alitas__container'>
+                                                <label className='alitas__label'>Alitas</label>
+                                                {tipoAlitas.map((alita, index) => {
+                                                    return (
+                                                        <div className='alitas__item' key={index}>
+                                                            <input type="checkbox" name='alitas' id='alitas' value={alita} 
+                                                            checked={selectedAlitas[selectedItem.id_menu._id]?.[indexQ]?.includes(alita) || false}
+                                                            onChange={(e) => handleAlitas(e,indexQ, selectedItem.id_menu._id)} />
+                                                            <label htmlFor="alitas">{alita}</label>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        }
                                     </div>
 
                                 ))}

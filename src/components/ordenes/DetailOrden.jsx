@@ -7,11 +7,14 @@ const DetailOrden = () => {
     const location = useLocation();
     const idOrden = location.state.idOrden;
     const token = localStorage.getItem("token");
+    const idcaja = localStorage.getItem("idcaja");
     const [orden, setOrden] = useState();
     const [total, setTotal] = useState();
     const [hamburguesa, setHamburguesa] = useState();
     const [c_observacion, setObservacion] = useState();
     const [ordenMenu, setOrdenMenu] = useState();
+    const [qingredientes, setQingredientes] = useState();
+    const [detalle, setDetalle] = useState();
 
     useEffect(() => {
         buscarOrden(idOrden);
@@ -29,7 +32,8 @@ const DetailOrden = () => {
             body: JSON.stringify(body),
             headers: {
                 "Content-type": "application/json",
-                "authorization": token
+                "authorization": token,
+                "box": idcaja
             }
         });
 
@@ -58,7 +62,8 @@ const DetailOrden = () => {
             setOrden([...Array(data.pedido)]);
             setHamburguesa(data.c_hamburguesa);
             setObservacion(data.c_observacion);
-
+            setQingredientes(data.qingredientesHamburguesa);
+            setDetalle(data.detalle);
 
         } else {
             console.log('error');
@@ -77,15 +82,15 @@ const DetailOrden = () => {
 
                             <div className='detalle__pedidos'>
                                 <li className='list__detalles'>
-                                    <span className='title__color title__pagar'>Nombre : </span> 
+                                    <span className='title__color title__pagar'>Nombre : </span>
                                     <span className='title__descripcion'>{list.name}</span>
                                 </li>
-                                
+
                                 <li className='list__detalles'>
-                                    <span className='title__color title__pagar '>Tipo : </span>  
+                                    <span className='title__color title__pagar '>Tipo : </span>
                                     <span className='title__descripcion'>{list.orderType}</span>
                                 </li>
-                                
+
                                 <li className='list__detalles'>
                                     <span className='title__color title__pagar '>Total : </span>
                                     <span className='title__descripcion'>{list.total}</span>
@@ -99,7 +104,7 @@ const DetailOrden = () => {
 
                                             <div className='item__menu--orden'>
                                                 <div>
-                                                    <span className='title__color title__pagar'>Menu:</span>
+                                                    <span className='title__color title__pagar'>Orden:</span>
                                                     <span className='title__descripcion'> {item.description}</span>
                                                 </div>
 
@@ -146,17 +151,68 @@ const DetailOrden = () => {
 
                                                             </div>
 
+                                                            <div className=''>
 
+                                                                {qingredientes && qingredientes.map((qing, index) => {
+
+                                                                    const ingFiltradas = qing.ingredientes.filter(
+                                                                        (resultadObs) =>
+                                                                            resultado.idmenu == resultadObs.idmenu &&
+                                                                            item.id_menu == resultadObs.idmenu &&
+                                                                            resultadObs.indice == resultado.indice
+                                                                    );
+
+                                                                    // Eliminar duplicados usando Set
+                                                                    const ingUnicos = [...new Set(ingFiltradas.map(JSON.stringify))].map(JSON.parse);
+
+                                                                    return ingUnicos.map((resultadObs, indexObser) => (
+                                                                        <div key={`resultado-<span class="math-inline">\{grupoIndex\}\-</span>{indexObser}`}
+                                                                            className='grupo__observacion extend__menu'>
+                                                                            <span className='title__color title__pagar'>Sin: </span>
+                                                                            <span className='title__descripcion'>{resultadObs.ingrediente.name_article}</span>
+                                                                        </div>
+                                                                    ));
+                                                                })}
+
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             ))}
+                                            <hr />
 
+                                            {detalle && detalle.map((details, index) => {
+                                                return (
+                                                    <div key={index} className=''>
+                                                        <span className='title__color title__pagar'>Alitas:  </span>
+                                                        
+                                                        {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
 
+                                                            if (indice == item.id_menu) {
+                                                                return (
+                                                                    <div key={indice} className='grupo__menu extend__menu'>
+                                                                        
+                                                                        {Array.isArray(valor) && valor.map((subArray, subIndex) => (
+                                                                            <div key={subIndex}>
+                                                                                {subArray.map((item, itemIndex) => (
+
+                                                                                    <span key={itemIndex} className='title__color title__pagar'>{subIndex+1} : {  item}</span>
+                                                                                ))}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        })}
+                                                    </div>
+                                                );
+                                            })}
 
 
 
                                         </div>
+
+
                                     )
                                 })}
                             </div>

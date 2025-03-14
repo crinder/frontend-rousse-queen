@@ -20,7 +20,7 @@ const Ordenes = () => {
 
     useEffect(() => {
         devuelveMenu();
-        
+
     }, []);
 
     useEffect(() => {
@@ -28,13 +28,13 @@ const Ordenes = () => {
     }, [cantidad]);
 
 
-    
+
 
     const onSelect = async () => {
 
         setTotal(0);
         let totalGen = 0;
-    
+
         Object.values(cantidad).forEach(async opcion => {
             try {
                 const devuelveMonto = await actualizaPrecios(opcion.id_menu, 'I');
@@ -44,7 +44,7 @@ const Ordenes = () => {
                 console.error("Error al actualizar precios:", error);
             }
         });
-       
+
     }
 
 
@@ -57,12 +57,14 @@ const Ordenes = () => {
         let array = [];
 
         objeto.map(item => {
-            const obj = {
-                id_menu: item.id_menu,
-                quantity: item.quantity
+            if (item.quantity > 0) {
+                const obj = {
+                    id_menu: item.id_menu,
+                    quantity: item.quantity
+                }
+                array.push(obj);
             }
-
-            array.push(obj);
+           
         });
 
 
@@ -103,13 +105,11 @@ const Ordenes = () => {
         } else {
             console.log('Error guardando orden');
         }
-
-
     }
 
     const devuelveMenu = async () => {
 
-        const requestMenu = await fetch(Global.url + 'menu/list/' + 1+'/N', {
+        const requestMenu = await fetch(Global.url + 'menu/list/' + 1 + '/N', {
 
             method: "GET",
             headers: {

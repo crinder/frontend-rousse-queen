@@ -26,16 +26,12 @@ const Movimientos = () => {
 
     const Ordenes = async () => {
 
-
-        let body = {
-            status: 2
-        }
-
         const requestOrden = await fetch(Global.url + 'orden/listAll', {
             method: 'GET',
             headers: {
                 "authorization": token,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "box": idcaja
             }
         });
 
@@ -47,18 +43,24 @@ const Movimientos = () => {
             let credito = 0;
             let dif = 0;
 
-            Ordendata.ordens.map(ordenes => {
+            Ordendata.ordens.forEach(ordenes => {
 
                 let idOrden = ordenes.id_orden;
 
-                ordenes.orden.map(orden => {
-                    credito += orden.total;
+                console.log('paso 1...', idOrden);
 
-                    if (!idOrden) {
-                        dif += orden.total;
-                    }
+
+
+                ordenes.orden.forEach(orden => {
+                    credito += orden.total;
+                    console.log('paso 2 credito...', credito);
+                    
+                    dif += orden.total;
+
                 });
             });
+
+            console.log('paso 3 credito...', dif);
 
             setNoPagada(dif);
 

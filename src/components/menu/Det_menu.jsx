@@ -20,9 +20,15 @@ const Det_menu = () => {
     const [hamburguesas, setHamburguesas] = useState(false);
     const [opcionesHamburguesa, setOpcionesHamburguesa] = useState([]);
     const [cantidadHamburguesa, setCantidadHamburguesa] = useState(0);
+    const [alitas, setAlitas] = useState(false);
 
     let id_menu = location.state.idmenu;
     let nombre = 0;
+
+    useEffect(() => {
+
+        console.log(opcionesHamburguesa);
+    },  [opcionesHamburguesa]);
 
     useEffect(() => {
 
@@ -49,7 +55,7 @@ const Det_menu = () => {
             id_hamburguesa: item.id
         }));
 
-        insertHamburguesa(c_body);
+        insertHamburguesa(c_body, 'E');
         setHamburguesas(hamburguesasEli);
         setOpcionesSeleccionadasHam(hamburguesasSelect);
 
@@ -57,13 +63,18 @@ const Det_menu = () => {
 
     const onSelectHam = (selectedList, selectedItem) => {
 
+        console.log(selectedList);
+        //setOpcionesHamburguesa[selectedList];
+
         const hamburguesasSelect = selectedList.map(item => ({
             id_hamburguesa: item.id
         }));
 
-        insertHamburguesa(hamburguesasSelect);
+        insertHamburguesa(hamburguesasSelect,'A');
 
         setOpcionesSeleccionadasHam(selectedList);
+
+        
     }
 
     const onRemoveHam = (selectedList, removedItem) => {
@@ -145,11 +156,12 @@ const Det_menu = () => {
 
     }
 
-    const insertHamburguesa = async (obj) => {
+    const insertHamburguesa = async (obj, ind) => {
 
         let c_body = {
             id_hamburguesa: obj,
-            cantidad_hamburguesa: cantidadHamburguesa
+            cantidad_hamburguesa: cantidadHamburguesa,
+            ind: ind
         }
 
         const request = await fetch(Global.url + 'menu/update/' + id_menu, {
@@ -228,18 +240,20 @@ const Det_menu = () => {
 
             setHamburguesas(hamburguesasSelect);
 
-            console.log(dataArt.hamburguesaSelect);
+            console.log('241...',dataArt.hamburguesaSelected);
 
 
-            if (dataArt.hamburguesaSelect.length > 0) {
+            if (dataArt.hamburguesaSelected.length > 0) {
 
-                const hamburguesasMap = dataArt.hamburguesaSelect.map(menu => ({
+                const hamburguesasMap = dataArt.hamburguesaSelected.map(menu => ({
 
                     name: menu.description,
                     id: menu._id
                 }));
 
                 setOpcionesHamburguesa(hamburguesasMap);
+            }else{
+                setOpcionesHamburguesa([]);
             }
 
 
@@ -318,8 +332,25 @@ const Det_menu = () => {
 
     }
 
+    useEffect(() => {
+        actualizaMenu();
+    }, [alitas]);
 
+    const actualizaMenu = async () => {
 
+        let body = {
+            alitas: alitas
+        };
+
+        const request = await fetch(Global.url + 'menu/update/' + id_menu, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+        });
+    }
 
     return (
         <div className='articulos__articulos'>
@@ -456,6 +487,11 @@ const Det_menu = () => {
                             <div className='content__field--menu'>
                                 <label htmlFor="contable" className='label__form'>Incluye hamburguesa?</label>
                                 <input type="checkbox" name='hamburguesa' id='hamburguesa' onChange={(e) => setHamburguesa(e.target.checked ? 'S' : 'N')} />
+                            </div>
+
+                            <div className='content__field--menu'>
+                                <label htmlFor="contable" className='label__form'>Incluye alitas?</label>
+                                <input type="checkbox" name='hamburguesa' id='hamburguesa' onChange={e => setAlitas(e.target.checked ? 'S' : 'N')} />
                             </div>
 
                             {hamburguesa == 'S' &&

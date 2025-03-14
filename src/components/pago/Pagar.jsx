@@ -16,7 +16,7 @@ const Pagar = () => {
     const [vueltoUs1, setVueltoUs1] = useState(0);
     const [recibidoUS, setRecibido] = useState(0);
     const [recibidoBS, setRecibidoBS] = useState(0);
-    const [tasa, setTasa] = useState(40);
+    const [tasa, setTasa] = useState(0);
 
     const location = useLocation();
     const token = localStorage.getItem("token");
@@ -24,12 +24,16 @@ const Pagar = () => {
 
     useEffect(() => {
         if (idOrden) {
-            devuelveOrden();
-            devuelveMetodos();
+            devuelveTasa();   
         } else {
             navigate('/rousse/home');
         }
     }, [idOrden, navigate]);
+
+    useEffect(() => { 
+        devuelveOrden();
+        devuelveMetodos();
+    }, [tasa]);
 
     useEffect(() => {
 
@@ -70,7 +74,7 @@ const Pagar = () => {
         const data = await request.json();
 
         if (data.status == "success") {
-            setMontoUs(data.ordens[0].total);
+            setMontoUs(data.ordens.total);
         } else {
             console.log('error');
         }
@@ -88,8 +92,6 @@ const Pagar = () => {
             let resto = parseInt(vueltoUs) + parseInt(montoUs);
 
             let dif = parseInt(recibidoUS) - parseInt(montoUs);
-
-            console.log(dif + ' ' + vueltoUs);
 
             if (vueltoUs > dif) {
                 setVueltoBs(0)
@@ -157,6 +159,11 @@ const Pagar = () => {
     /* fin pagos */
 
     const changeMethod = (event) => {
+        
+        setRecibidoBS(0);
+        setRecibido(0);
+        setVueltoBs(0);
+        setVueltoUs(0);
         setPaymement(event.target.value);
     }
 
@@ -289,6 +296,26 @@ const Pagar = () => {
         }
     }
 
+    const devuelveTasa = async () => { 
+
+        const request = await fetch(Global.url + 'operation/list/', {
+            method: "GET",
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await request.json();
+
+        if (data.status == "success") {
+            setTasa(data.cajaStored.rate);
+        } else {
+            console.log('error');
+        }
+
+     }
+
     return (
         <div className='orden__crear '>
             {mostrar &&
@@ -299,6 +326,11 @@ const Pagar = () => {
 
                         <div className='pagar__span'>
                             <span className='title__color title__pagar'>Total a Pagar: {montoUs}$</span>
+                           
+                        </div>
+
+                        <div className='pagar__span'>
+                            <span className='title__color title__pagar'>Tasa: {tasa}BS</span>
                         </div>
 
                         <div className='content__field'>
@@ -416,7 +448,7 @@ const Pagar = () => {
                         )}
 
                         <div className='button__pagar'>
-                            <input type="submit" className="user__button" value='Pagar' />
+                            <input type="submit" className="user__button" value='Cobrar' />
                         </div>
                     </form>
 

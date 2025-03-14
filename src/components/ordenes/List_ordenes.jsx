@@ -9,6 +9,7 @@ const List_ordenes = () => {
 
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const idcaja = localStorage.getItem("idcaja");
     const [ordens, setOrdens] = useState([]);
     const [ordensPro, setOrdensPro] = useState([]);
     const [idsParaEliminar, setIdsParaEliminar] = useState([]);
@@ -26,7 +27,6 @@ const List_ordenes = () => {
     }
 
     const eliminar = async (idOrden) => {
-
 
         const requestDel = await fetch(Global.url + 'orden/delete-orden/' + idOrden, {
             method: 'DELETE',
@@ -59,9 +59,9 @@ const List_ordenes = () => {
 
     const devuelveOrdenes = async (ind) => {
 
-
         let body = {
-            status: 0
+            status: 0,
+            id_caja: idcaja
         }
 
         if (ind == 'P') {
@@ -78,7 +78,8 @@ const List_ordenes = () => {
             body: JSON.stringify(body),
             headers: {
                 "Content-type": "application/json",
-                "authorization": token
+                "authorization": token,
+                "box": idcaja
             }
         });
 
