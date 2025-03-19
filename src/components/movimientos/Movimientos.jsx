@@ -5,23 +5,27 @@ const Movimientos = () => {
 
     const token = localStorage.getItem('token');
     const idcaja = localStorage.getItem('idcaja');
-    const [ordenesF, setOrdenesF] = useState({});
-    const [credit, setCredit] = useState(0);
-    const [others, setOthers] = useState({});
-    const [debit, setDebit] = useState(0);
-    const [capital, setCapital] = useState(0);
-    const [forma, setForma] = useState({});
+    const tasa = localStorage.getItem('rate');
     const [noPagada, setNoPagada] = useState(0);
-    const [cuenta, setCuenta] = useState({});
     const [otrosPagosBS, setOtrosPagosBS] = useState(0);
     const [otrosPagosUS, setOtrosPagosUS] = useState(0);
     const [totalesBS, setTotalesBS] = useState(0);
     const [totalesUS, setTotalesUS] = useState(0);
+    const [totalPagoMov, setTotalPagoMov] = useState(0);
+    const [delivery, setDelivery] = useState(0);
+    const [totalCreditoBs, setTotalCreditoBs] = useState(0);
+    const [totalCredito, setTotalCredito] = useState(0);
+    const [pendiente, setPendiente] = useState(0);
+    const [success, setSuccess] = useState(false);
+    const [bsDivisas, setBsDivisas] = useState(0);
+
 
 
     useEffect(() => {
         Ordenes();
-    }, [])
+    }, []);
+
+
 
 
     const Ordenes = async () => {
@@ -38,230 +42,160 @@ const Movimientos = () => {
         const Ordendata = await requestOrden.json();
 
         if (Ordendata.status == 'success') {
-            setOrdenesF(Ordendata.ordens);
 
-            let credito = 0;
-            let dif = 0;
+            let totalBs = Ordendata.pagadoBs.reduce((acc, pago) => acc + pago.received_local, 0);
+            let totalUS = Ordendata.pagadoUS.reduce((acc, pago) => acc + pago.received_money, 0);
+            let totalPagoMov = Ordendata.pagoMovil.reduce((acc, pago) => acc + pago.received_local, 0);
+            let totalDelivery = Ordendata.delivery.reduce((acc, pago) => acc + parseFloat(pago.cost_delivery), 0);
+            let total_pagos = Ordendata.otrosPagos.reduce((acc, pago) => acc + pago.total, 0);
+            let ordenPendiente = Ordendata.pediente.reduce((acc, pago) => acc + pago.total, 0);
+            let total_bs = parseFloat(totalBs) + parseFloat(totalPagoMov);
+            let total_divisas = parseFloat(totalUS) + parseFloat(ordenPendiente);
+            let total_bs_divisas = total_bs / tasa;
 
-            Ordendata.ordens.forEach(ordenes => {
-
-                let idOrden = ordenes.id_orden;
-
-                console.log('paso 1...', idOrden);
-
-
-
-                ordenes.orden.forEach(orden => {
-                    credito += orden.total;
-                    console.log('paso 2 credito...', credito);
-                    
-                    dif += orden.total;
-
-                });
-            });
-
-            console.log('paso 3 credito...', dif);
-
-            setNoPagada(dif);
-
-            let pagos = {};
-            let totalBS = 0;
-            let totalUS = 0;
-
-            Ordendata.ordens.map(ordenes => {
-
-                let idOrden = ordenes.id_orden;
-
-                if (idOrden) {
-                    let pago = idOrden.paymement_method;
-                    let total = idOrden.total;
-
-
-                    if (!pagos[pago]) {
-                        pagos[pago] = {
-                            total: 0,
-                            bolivares: 0,
-                            divisas: 0,
-                            code: pago
-                        };
-                    }
-
-                    pagos[pago].total += total;
-                    pagos[pago].bolivares += idOrden.received_local;
-                    pagos[pago].divisas += idOrden.received_money;
-                    totalBS += idOrden.received_local;
-                    totalUS += idOrden.received_money;
-
-                }
-            });
-
-            setCuenta(pagos);
-
-            const requestOthers = await fetch(Global.url + 'others/find_payment', {
-                method: 'GET',
-                headers: {
-                    "authorization": token,
-                    "box": idcaja,
-                    "Content-Type": "application/json"
-                }
-            });
-
-            const dataOthers = await requestOthers.json();
-
-            if (dataOthers.status == 'success') {
-                setOthers(dataOthers.findStore);
-
-            };
-
-            let debito = 0;
-            let capital = 0;
-            let PagosBS = 0;
-            let PagosUS = 0;
-
-            dataOthers.findStore.map(cred => {
-
-                if (cred.pago.code != 5) {
-                    debito += cred.total;
-                    PagosBS += cred.total_local;
-                    PagosUS += cred.total_money;
-                } else {
-                    capital += cred.total;
-                }
-
-
-            });
-
-            credito += capital;
-
-            let c_body = {
-                group: "metodo_pago"
-            }
-
-            const requestPago = await fetch(Global.url + 'descripcion/filter', {
-
-                method: "POST",
-                body: JSON.stringify(c_body),
-                headers: {
-                    "authorization": token,
-                    "Content-Type": "application/json"
-                }
-
-            });
-
-            const dataPago = await requestPago.json();
-
-            if (dataPago.status == 'success') {
-                setForma(dataPago.findStored);
-                console.log(dataPago.findStored);
-            }
-
-            totalBS += PagosBS;
-            totalUS += PagosUS;
-
-            setTotalesBS(totalBS);
+            setOtrosPagosUS(total_pagos);
+            setTotalPagoMov(totalPagoMov);
+            setDelivery(totalDelivery);
+            setTotalesBS(totalBs);
             setTotalesUS(totalUS);
-            setOtrosPagosBS(PagosBS);
-            setOtrosPagosUS(PagosUS);
-            setDebit(debito);
-            setCapital(capital)
-            setCredit(credito);
+            setPendiente(ordenPendiente);
+            setTotalCreditoBs(total_bs);
+            setTotalCredito(total_divisas);
+            setBsDivisas(total_bs_divisas);
+            setSuccess(true);
+            
         }
     }
 
 
     return (
         <div className='orden__crear'>
-            <table className='table__movimientos'>
-                <thead className='movimientos__head'>
-                    <tr className='movimientos__tr'>
-                        <th className='movimientos__th'>Concepto</th>
-                        <th className='movimientos__th'>Crédito</th>
-                        <th className='movimientos__th'>Débito</th>
-                    </tr>
-                </thead>
-                <tbody>
 
-                    {ordenesF && Array.isArray(ordenesF) && ordenesF.map(ordenes => {
-                        return (
-                            ordenes.orden && Array.isArray(ordenes.orden) && ordenes.orden.map((orden, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <td>Orden: {orden.name}</td>
-                                        <td>{orden.total}</td>
-                                        <td>0</td>
-                                    </tr>
-                                )
-                            })
-                        )
-                    })}
+            {success &&
 
-                    {others.length > 0 && others.map(other => {
-
-                        return (
-                            <tr key={other._id}>
-                                <td>Otros pago: {other.pago.descrip}</td>
-                                <td>{other.pago.code == 5 ? other.total : 0}</td>
-                                <td>{other.pago.code != 5 ? other.total : 0}</td>
+                <div className='div__movimientos'>
+                    <table className='table__movimientos'>
+                        <thead className='movimientos__head'>
+                            <tr className='movimientos__tr'>
+                                <th className='movimientos__th'>Forma de pago</th>
+                                <th className='movimientos__th'>Bolivares</th>
+                                <th className='movimientos__th'>Divisas</th>
                             </tr>
-                        )
-                    })
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pendientes: </td>
+                                <td>-</td>
+                                <td>{pendiente}</td>
+                            </tr>
 
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td>Totales:</td>
-                        <td>{credit}</td>
-                        <td>{debit}</td>
-                    </tr>
-                </tfoot>
-            </table>
+                            <tr>
+                                <td>Divisas</td>
+                                <td>-</td>
+                                <td>{totalesUS}</td>
+                            </tr>
 
-            <table className='table__movimientos'>
-                <thead className='movimientos__head'>
-                    <tr className='movimientos__tr'>
-                        <th className='movimientos__th'>Forma de pago</th>
-                        <th className='movimientos__th'>Bolivares</th>
-                        <th className='movimientos__th'>Divisas</th>
-                    </tr>
-                </thead>
-                <tbody>
+                            <tr>
+                                <td>Pago movil: </td>
+                                <td>{totalPagoMov}</td>
+                                <td>-</td>
+                            </tr>
 
-                    {forma.length > 0 && forma.map(pago => {
-                        let pagoObj = cuenta[pago.code];
-                        if (pagoObj) {
-                            return (
-                                <tr key={pago._id}>
-                                    <td>{pago.descrip}</td>
-                                    <td>{pagoObj.bolivares}</td>
-                                    <td>{pagoObj.divisas}</td>
-                                </tr>
-                            )
-                        }
-                    })}
+                            <tr>
+                                <td>bs efectivo: </td>
+                                <td>{noPagada}</td>
+                                <td>-</td>
+                            </tr>
 
-                    <tr>
-                        <td>Ordenes no pagadas: </td>
-                        <td>0</td>
-                        <td>{noPagada}</td>
-                    </tr>
+                        </tbody>
 
-                    <tr>
-                        <td>Otros pagos</td>
-                        <td>{otrosPagosBS}</td>
-                        <td>{otrosPagosUS}</td>
-                    </tr>
+                        <tfoot>
 
-                </tbody>
+                            <tr>
+                                <td>subTotal :</td>
+                                <td>{totalCreditoBs}</td>
+                                <td>{totalCredito}</td>
+                            </tr>
 
-                <tfoot>
-                    <tr>
-                        <td>Totales:</td>
-                        <td>{totalesBS}</td>
-                        <td>{totalesUS}</td>
-                    </tr>
-                </tfoot>
-            </table>
+                            <tr>
+                                <td>Bs = divisas:</td>
+                                <td>{bsDivisas}</td>
+                                <td>{totalCredito}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Total:</td>
+                                <td></td>
+                                <td>{totalCredito + bsDivisas}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <table className='table__movimientos'>
+                        <thead className='movimientos__head'>
+                            <tr className='movimientos__tr'>
+                                <th className='movimientos__th'>Concepto</th>
+                                <th className='movimientos__th'>Bolivares</th>
+                                <th className='movimientos__th'>Divisas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr>
+                                <td>Otros pagos</td>
+                                <td>{otrosPagosBS}</td>
+                                <td>{otrosPagosUS}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Delivery</td>
+                                <td>0</td>
+                                <td>{delivery}</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                    <table className='table__movimientos'>
+                        <thead className='movimientos__head'>
+                            <tr className='movimientos__tr'>
+                                <th className='movimientos__th'>Balance</th>
+                                <th className='movimientos__th'>Ingreso</th>
+                                <th className='movimientos__th'>Egreso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr>
+                                <td>Total ingreso</td>
+                                <td>{totalCredito + bsDivisas}</td>
+                                <td>-</td>
+                            </tr>
+
+                            <tr>
+                                <td>Total egreso</td>
+                                <td>-</td>
+                                <td>{otrosPagosUS}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Total delivery</td>
+                                <td>-</td>
+                                <td>{delivery}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Total general</td>
+                                <td>{(totalCredito + bsDivisas) - otrosPagosUS - delivery}</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+            }
 
         </div>
     )

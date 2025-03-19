@@ -492,9 +492,29 @@ const DetalleOrden = () => {
         }
     }
 
+    const checkInventario = async () => {
+        const request = await fetch(Global.url + 'det-orden/check_inventario/' + idOrden, {
+            method: "GET",
+            headers: {
+                "Content-type": 'application/json',
+                "authorization": token
+            }
+        });
+
+        const data = await request.json();
+
+        if (data.status == "success") {
+            console.log('checkInventario...', data.checkInventario);
+        } else {
+            console.log('error');
+        }
+    }
+
     const actualizarOrden = async (e) => {
         e.preventDefault();
+        checkInventario();
         actualizaDetalle();
+       
     }
 
     useEffect(() => {
@@ -565,7 +585,7 @@ const DetalleOrden = () => {
             } else {
                 updatedState[idmenu][items] = updatedState[idmenu][items].filter(item => item != idHamburguesa);
 
-                if (eIngredienteHamburguesa[idmenu]?.[items].length > 0) {
+                if (eIngredienteHamburguesa[idmenu]?.[items]) {
                     setEIngredienteHamburguesa(prevMap => {
                         const updatedMap = { ...prevMap };
                         delete updatedMap[idmenu][items];
@@ -582,7 +602,7 @@ const DetalleOrden = () => {
 
     return (
         <div className='orden__crear orden__detalle orden--ampliar'>
-            <div className="form-check form-switch totales">
+            <div className="form-check form-switch totales__orden">
                 <span>Total: {total}</span>
 
                 {(mdelivery > 0 && ordenType != 1) &&
@@ -770,7 +790,7 @@ const DetalleOrden = () => {
                         </div>
 
                         <div className='detalle__section'>
-                            {(changeCheck && ordenType != 1) &&
+                            {(changeCheck || ordenType == 4) &&
 
                                 <Select name="delivery" className="user__input--orden"
                                     onChange={changedDelivery}

@@ -16,25 +16,25 @@ const Det_menu = () => {
     const [NombreMenu, setNombreMenu] = useState('');
     const [resta, setResta] = useState('');
     const [opcional, setOpcional] = useState('');
-    const [hamburguesa, setHamburguesa] = useState(false);
+    const [hamburguesaAdd, setHamburguesaAdd] = useState('N');
     const [hamburguesas, setHamburguesas] = useState(false);
     const [opcionesHamburguesa, setOpcionesHamburguesa] = useState([]);
     const [cantidadHamburguesa, setCantidadHamburguesa] = useState(0);
-    const [alitas, setAlitas] = useState(false);
+    const [alitas, setAlitas] = useState();
+    const [menu, setMenu] = useState('');
+    const [alitaSelected, setAlitaSelected] = useState();
+    const [hamburguesaSelected, setHamburguesaSelected] = useState();
+    const [cantidad, setCantidad] = useState();
 
     let id_menu = location.state.idmenu;
     let nombre = 0;
 
     useEffect(() => {
 
-        console.log(opcionesHamburguesa);
-    },  [opcionesHamburguesa]);
-
-    useEffect(() => {
-
         nombre = location.state.nombre;
 
         setNombreMenu(nombre);
+        listar();
     }, []);
 
     const changeResta = (evento, id) => {
@@ -70,11 +70,11 @@ const Det_menu = () => {
             id_hamburguesa: item.id
         }));
 
-        insertHamburguesa(hamburguesasSelect,'A');
+        insertHamburguesa(hamburguesasSelect, 'A');
 
         setOpcionesSeleccionadasHam(selectedList);
 
-        
+
     }
 
     const onRemoveHam = (selectedList, removedItem) => {
@@ -88,6 +88,34 @@ const Det_menu = () => {
         }
 
         setOpcionesSeleccionadasHam(selectedList);
+    }
+
+    const listar = async () => {
+        let sucursal = 1;
+
+        const request = await fetch(Global.url + 'menu/listOne/' + id_menu, {
+            method: "GET",
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+
+        });
+
+        const data = await request.json();
+
+        if (data.status == "success") {
+            setMenu(data.menu);
+            setAlitaSelected(data.menu.alitas);
+
+            if (data.menu.cantidad_hamburguesa > 0) {
+                console.log(data.menu.cantidad_hamburguesa);
+                setHamburguesaAdd('S');
+                setCantidad(data.menu.cantidad_hamburguesa);
+            }
+           
+        }
+
     }
 
 
@@ -185,8 +213,6 @@ const Det_menu = () => {
 
     const insertMenu = async (obj) => {
 
-        console.log('insert...' + id_menu);
-
         const request = await fetch(Global.url + 'det-menu/register/' + id_menu, {
             method: "POST",
             body: JSON.stringify(obj),
@@ -240,9 +266,6 @@ const Det_menu = () => {
 
             setHamburguesas(hamburguesasSelect);
 
-            console.log('241...',dataArt.hamburguesaSelected);
-
-
             if (dataArt.hamburguesaSelected.length > 0) {
 
                 const hamburguesasMap = dataArt.hamburguesaSelected.map(menu => ({
@@ -252,7 +275,7 @@ const Det_menu = () => {
                 }));
 
                 setOpcionesHamburguesa(hamburguesasMap);
-            }else{
+            } else {
                 setOpcionesHamburguesa([]);
             }
 
@@ -332,24 +355,33 @@ const Det_menu = () => {
 
     }
 
+    const changeAlitas = (e) => {
+
+        setAlitas(e);
+        setAlitaSelected(e);
+    }
+
     useEffect(() => {
         actualizaMenu();
+        listar();
     }, [alitas]);
 
     const actualizaMenu = async () => {
 
-        let body = {
-            alitas: alitas
-        };
+        if (alitas) {
+            let body = {
+                alitas: alitas
+            };
 
-        const request = await fetch(Global.url + 'menu/update/' + id_menu, {
-            method: "POST",
-            body: JSON.stringify(body),
-            headers: {
-                "authorization": token,
-                "Content-Type": "application/json"
-            }
-        });
+            const request = await fetch(Global.url + 'menu/update/' + id_menu, {
+                method: "POST",
+                body: JSON.stringify(body),
+                headers: {
+                    "authorization": token,
+                    "Content-Type": "application/json"
+                }
+            });
+        }
     }
 
     return (
@@ -486,15 +518,19 @@ const Det_menu = () => {
 
                             <div className='content__field--menu'>
                                 <label htmlFor="contable" className='label__form'>Incluye hamburguesa?</label>
-                                <input type="checkbox" name='hamburguesa' id='hamburguesa' onChange={(e) => setHamburguesa(e.target.checked ? 'S' : 'N')} />
+                                <input type="checkbox" name='hamburguesa' id='hamburguesa' 
+                                                       onChange={(e) => setHamburguesaAdd(e.target.checked ? 'S' : 'N')} 
+                                                       checked={hamburguesaAdd}/>
                             </div>
 
                             <div className='content__field--menu'>
                                 <label htmlFor="contable" className='label__form'>Incluye alitas?</label>
-                                <input type="checkbox" name='hamburguesa' id='hamburguesa' onChange={e => setAlitas(e.target.checked ? 'S' : 'N')} />
+                                <input type="checkbox" name='hamburguesa' id='hamburguesa'
+                                    onChange={e => changeAlitas(e.target.checked ? 'S' : 'N')}
+                                    checked={alitaSelected == 'S' ? true : false} />
                             </div>
 
-                            {hamburguesa == 'S' &&
+                            {hamburguesaAdd == 'S' && hamburguesas &&
 
                                 <div>
 
@@ -508,7 +544,9 @@ const Det_menu = () => {
 
                                     <div className='content__field--menu'>
                                         <label htmlFor="contable" className='label__form'>Cantidad de hamburguesa?</label>
-                                        <input type="text" name='cantidad_hamburguesa' id='cantidad_hamburguesa' onChange={(e) => setCantidadHamburguesa(e.target.value)} />
+                                        <input type="text" name='cantidad_hamburguesa' id='cantidad_hamburguesa' onChange={(e) => setCantidadHamburguesa(e.target.value)} 
+                                        defaultValue={cantidad}
+                                        />
                                     </div>
 
                                 </div>

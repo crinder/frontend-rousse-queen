@@ -1107,7 +1107,8 @@ body {
 
 .icons_pedido{
   display: flex;
-  flex-direction: column;
+  width: 100%;
+  justify-content: space-around;
 }
 
 .orden__pedidos{
@@ -1485,8 +1486,10 @@ tr:hover {
   align-items: center;
 }
 
-.totales{
+.totales__orden{
   position: fixed;
+  display: flex;
+  flex-direction: column;
   top: 50px;
   right: 50px;
   font-size: 4rem;

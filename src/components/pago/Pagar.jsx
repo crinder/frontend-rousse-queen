@@ -24,13 +24,13 @@ const Pagar = () => {
 
     useEffect(() => {
         if (idOrden) {
-            devuelveTasa();   
+            devuelveTasa();
         } else {
             navigate('/rousse/home');
         }
     }, [idOrden, navigate]);
 
-    useEffect(() => { 
+    useEffect(() => {
         devuelveOrden();
         devuelveMetodos();
     }, [tasa]);
@@ -46,7 +46,7 @@ const Pagar = () => {
         if (idOrden) {
             paymement3();
         }
-    }, [vueltoUs, vueltoBs, idOrden]);
+    }, [vueltoUs]);
 
     /*pagos*/
 
@@ -56,8 +56,6 @@ const Pagar = () => {
         recibe = recibe.replace(/[^\d]/g, '');
 
         setRecibido(recibe);
-        setVueltoUs(0);
-        setVueltoBs(0);
 
     }
 
@@ -84,38 +82,38 @@ const Pagar = () => {
 
         if (paymement == 2) {
 
-            let total = recibidoUS - montoUs;
-            let totbs = total * tasa;
-            setVueltoUs(total);
-            setVueltoBs(totbs);
+            let total_us = recibidoUS - montoUs;
+            setVueltoUs(total_us);
 
-            let resto = parseInt(vueltoUs) + parseInt(montoUs);
+            let resto = parseInt(total_us) + parseInt(montoUs);
 
             let dif = parseInt(recibidoUS) - parseInt(montoUs);
 
             if (vueltoUs > dif) {
                 setVueltoBs(0)
-            } else {
-                let total = recibidoUS - resto;
-                let totbs = total * tasa;
-                setVueltoBs(totbs);
             }
 
         } else if (paymement == 3 || paymement == 4) {
 
             let total;
-            let recibido = parseInt(recibidoUS) + parseInt(recibidoBS);
+            let recibido = parseInt(recibidoUS);
 
             total = recibido - montoUs;
 
-            if (vueltoUs == '') {
+            let resto = montoUs - recibido;
 
-                setVueltoUs('');
+            console.log(total);
+            console.log(resto);
+
+            total = total + resto;
+            
+
+            if (isNaN(total)) {
+                setVueltoUs1(0);
             } else {
-                null;
+                setRecibidoBS(resto * tasa);
+                setVueltoUs1(total);
             }
-
-            setVueltoUs1(total);
 
         } else if (paymement == 1) {
 
@@ -130,12 +128,21 @@ const Pagar = () => {
 
             let total = recibidoUS - montoUs;
 
+            console.log(total);
+
             if (vueltoUs >= total) {
                 setVueltoUs(total);
+                setVueltoBs(0);
             } else {
-                let totbs = total - vueltoUs;
-                totbs = totbs * tasa;
-                setVueltoBs(totbs);
+
+                let sumaVuelto = parseInt(recibidoUS) - parseInt(montoUs);
+
+                if (parseInt(sumaVuelto) != parseInt(vueltoUs)) {
+                    let totbs = total - vueltoUs;
+                    totbs = totbs * tasa;
+                    setVueltoBs(totbs);
+                }
+
             }
         }
     }
@@ -151,15 +158,15 @@ const Pagar = () => {
     const changedRecibidoBs = (event) => {
 
         const newReciboBS = event.target.value;
-        setRecibidoBS(newReciboBS);
+        /*setRecibidoBS(newReciboBS);
         setVueltoUs(0);
-        setVueltoBs(0);
+        setVueltoBs(0);*/
     }
 
     /* fin pagos */
 
     const changeMethod = (event) => {
-        
+
         setRecibidoBS(0);
         setRecibido(0);
         setVueltoBs(0);
@@ -269,10 +276,11 @@ const Pagar = () => {
             received_local: recibidoBS,
             received_money: recibidoUS,
             change_local: vueltoBs,
-            change_money: vueltoUs
+            change_money: vueltoUs,
+            status: 2 // pagada
         }
 
-        const requestSave = await fetch(Global.url + 'det-orden/register/' + idOrden, {
+        const requestSave = await fetch(Global.url + 'orden/update/' + idOrden, {
             method: 'POST',
             body: JSON.stringify(c_body),
             headers: {
@@ -296,7 +304,7 @@ const Pagar = () => {
         }
     }
 
-    const devuelveTasa = async () => { 
+    const devuelveTasa = async () => {
 
         const request = await fetch(Global.url + 'operation/list/', {
             method: "GET",
@@ -314,7 +322,7 @@ const Pagar = () => {
             console.log('error');
         }
 
-     }
+    }
 
     return (
         <div className='orden__crear '>
@@ -326,7 +334,7 @@ const Pagar = () => {
 
                         <div className='pagar__span'>
                             <span className='title__color title__pagar'>Total a Pagar: {montoUs}$</span>
-                           
+
                         </div>
 
                         <div className='pagar__span'>
@@ -337,9 +345,13 @@ const Pagar = () => {
                             <label className="user__label--orden" htmlFor="paymement_method">Metodo de pago</label>
                             <select name="orderType" className="user__input--orden" onChange={changeMethod}>
                                 {metodo.length > 0 && metodo.map(metod => {
-                                    return (
-                                        <option value={metod.code} key={metod.code}>{metod.descrip}</option>
-                                    )
+
+                                    if (metod.code != 5 && metod.code != 6) {
+                                        return (
+                                            <option value={metod.code} key={metod.code}>{metod.descrip}</option>
+                                        )
+                                    }
+
                                 })}
                             </select>
                         </div>
@@ -363,7 +375,7 @@ const Pagar = () => {
                                 <div className='content__field'>
 
                                     <label htmlFor="received_money" className='label__form'>Vuelto BS</label>
-                                    <input type="text" name='change_local' id='change_local' className='input__form' disabled value={vueltoBs} />
+                                    <input type="text" name='change_local' id='change_local' className='input__form' readOnly value={vueltoBs} />
 
                                 </div>
 
@@ -388,7 +400,7 @@ const Pagar = () => {
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido BS</label>
-                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required />
+                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required value={recibidoBS} readOnly/>
                                 </div>
 
                                 <div className='content__field'>

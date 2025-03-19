@@ -25,8 +25,8 @@ const Menu = () => {
 
   const listar = async () => {
     let sucursal = 1;
-    
-    const request = await fetch(Global.url + 'menu/list/' + sucursal +'/N', {
+
+    const request = await fetch(Global.url + 'menu/list/' + sucursal + '/N', {
       method: "GET",
       headers: {
         "authorization": token,
@@ -122,27 +122,31 @@ const Menu = () => {
           <span className='title__color--title'>Configura el menú</span>
         </header>
 
-        {menus.map(menu => {
+        <table className='table__movimientos'>
+          <thead className='movimientos__head'>
+            <tr className='movimientos__tr'>
+              <th className='movimientos__th'>Menu</th>
+              <th className='movimientos__th'>Precio</th>
+              <th className='movimientos__th'>Eliminar?</th>
+            </tr>
+          </thead>
+          <tbody>
 
-          return (
-            <section className="card__menu" key={menu._id} >
+            {menus.map(menu => {
 
-              <article className='title__menu title__menu--menu' onClick={() => det_menu(menu._id, menu.description)}>
-                <span className='title__color title__color--subtitle'>{menu.description}</span>
+              return (
+                <tr key={menu._id}>
+                  <td onClick={() => det_menu(menu._id, menu.description)} key={menu._id}>{menu.description}</td>
+                  <td onClick={() => det_menu(menu._id, menu.description)} key={menu._id}>{menu.price}$</td>
+                  <td><span className='' onClick={() => eliminar(menu._id)}><FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' /></span></td>
+                </tr>
 
-              </article>
+              )
+            })
 
-              <article className='title__menu'>
-                <span className='title__color title__color--subtitle'>{menu.price}$</span>
-                <span className='icon__menu' onClick={() => eliminar(menu._id)}><FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' /></span>
-              </article>
-
-            </section>
-
-          )
-        })
-
-        }
+            }
+          </tbody>
+        </table>
 
         <div className='articulos__articulos'>
 
@@ -179,7 +183,7 @@ const Menu = () => {
           <section className='articulos__container'>
 
             <header className='articulo_headers'>
-              <span className='title__color--title' onClick={()=> crearHamburguesa()}>Agrega hamburguesa</span>
+              <span className='title__color--title' onClick={() => crearHamburguesa()}>Agrega hamburguesa</span>
             </header>
 
           </section>

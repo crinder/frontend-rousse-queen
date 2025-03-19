@@ -15,6 +15,13 @@ const DetailOrden = () => {
     const [ordenMenu, setOrdenMenu] = useState();
     const [qingredientes, setQingredientes] = useState();
     const [detalle, setDetalle] = useState();
+    const [indAlitas, setIndAlitas] = useState(true);
+    const tipo_orden = {
+        1: 'En mesa',
+        2: 'Fiado sin abono',
+        3: 'Mas tarde',
+        4: 'Delivery'
+    }
 
     useEffect(() => {
         buscarOrden(idOrden);
@@ -65,10 +72,81 @@ const DetailOrden = () => {
             setQingredientes(data.qingredientesHamburguesa);
             setDetalle(data.detalle);
 
+            if(data.c_hamburguesa.length > 0){
+                setIndAlitas(false);
+            }
+
         } else {
             console.log('error');
         }
 
+    }
+
+    const Alitas = ({ detalle, item, resultado }) => {
+        return (
+            detalle && detalle.map((details, index) => {
+                return (
+                    <div key={index} className=''>
+                        <span className='title__color title__pagar'>Alitas:  </span>
+
+                        {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
+
+                            if (indice == item.id_menu) {
+                                return (
+                                    <div key={indice} className='grupo__menu extend__menu'>
+                                        {Array.isArray(valor) && valor.map((subArray, subIndex) => {
+                                            if (subIndex == resultado) {
+                                                return (
+                                                    <div key={subIndex}>
+                                                        {subArray.map((item, itemIndex) => (
+                                                            <span key={itemIndex} className='title__color title__pagar'>{subIndex + 1} : {item}</span>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+                                );
+                            }
+                        })}
+                    </div>
+                );
+            })
+        )
+    }
+
+
+    const AlitasSin = ({ detalle, item }) => {
+        return (
+            detalle && detalle.map((details, index) => {
+                return (
+                    <div key={index} className=''>
+                        <span className='title__color title__pagar'>Alitas:  </span>
+
+                        {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
+
+                            return (
+                                <div key={indice} className='grupo__menu extend__menu'>
+                                    {Array.isArray(valor) && valor.map((subArray, subIndex) => {
+
+                                        return (
+                                            <div key={subIndex}>
+                                                {subArray.map((item, itemIndex) => (
+                                                    <span key={itemIndex} className='title__color title__pagar'>{subIndex + 1} : {item}</span>
+                                                ))}
+                                            </div>
+                                        );
+
+                                    })}
+                                </div>
+                            );
+
+                        })}
+                    </div>
+                );
+            })
+        )
     }
 
     return (
@@ -88,12 +166,12 @@ const DetailOrden = () => {
 
                                 <li className='list__detalles'>
                                     <span className='title__color title__pagar '>Tipo : </span>
-                                    <span className='title__descripcion'>{list.orderType}</span>
+                                    <span className='title__descripcion'>{tipo_orden[list.orderType]}</span>
                                 </li>
 
                                 <li className='list__detalles'>
-                                    <span className='title__color title__pagar '>Total : </span>
-                                    <span className='title__descripcion'>{list.total}</span>
+                                    <span className='title__color title__pagar '>#  </span>
+                                    <span className='title__descripcion'>{list.num_orden}</span>
                                 </li>
                             </div>
 
@@ -175,41 +253,18 @@ const DetailOrden = () => {
                                                                 })}
 
                                                             </div>
+                                                            <Alitas detalle={detalle} item={item} resultado={resultado.indice} />
                                                         </div>
                                                     ))}
                                                 </div>
                                             ))}
                                             <hr />
 
-                                            {detalle && detalle.map((details, index) => {
-                                                return (
-                                                    <div key={index} className=''>
-                                                        <span className='title__color title__pagar'>Alitas:  </span>
-                                                        
-                                                        {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
 
-                                                            if (indice == item.id_menu) {
-                                                                return (
-                                                                    <div key={indice} className='grupo__menu extend__menu'>
-                                                                        
-                                                                        {Array.isArray(valor) && valor.map((subArray, subIndex) => (
-                                                                            <div key={subIndex}>
-                                                                                {subArray.map((item, itemIndex) => (
-
-                                                                                    <span key={itemIndex} className='title__color title__pagar'>{subIndex+1} : {  item}</span>
-                                                                                ))}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        })}
-                                                    </div>
-                                                );
-                                            })}
-
-
-
+                                            {indAlitas &&
+                                                <AlitasSin detalle={detalle} item={item}/>
+                                            }
+                                            
                                         </div>
 
 

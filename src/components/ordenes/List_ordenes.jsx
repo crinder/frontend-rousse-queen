@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { IconView } from '../Util/Iconos';
+import moment from 'moment';
 
 const List_ordenes = () => {
 
@@ -13,6 +14,12 @@ const List_ordenes = () => {
     const [ordens, setOrdens] = useState([]);
     const [ordensPro, setOrdensPro] = useState([]);
     const [idsParaEliminar, setIdsParaEliminar] = useState([]);
+    const tipo_orden = {
+        1: 'En mesa',
+        2: 'Fiado sin abono',
+        3: 'Mas tarde',
+        4: 'Delivery'
+    }
 
     const toggleEliminar = (id) => {
         if (idsParaEliminar.includes(id)) {
@@ -39,23 +46,24 @@ const List_ordenes = () => {
         const dataDel = await requestDel.json();
 
 
-        devuelveOrdenes();
+        fecthOrden();
 
     }
 
     useEffect(() => {
-        const fecthOrden = async () => {
-
-            const ordenpen = await devuelveOrdenes('P'); // busco las pendiente
-            console.log('pendientes...', ordenpen);
-            setOrdens(ordenpen);
-            const ordenPro = await devuelveOrdenes('S'); // busco las procesada
-            console.log('Procesada..', ordenPro);
-            setOrdensPro(ordenPro);
-        }
-
+    
         fecthOrden();
     }, []);
+
+    const fecthOrden = async () => {
+
+        const ordenpen = await devuelveOrdenes('P'); // busco las pendiente
+        console.log('pendientes...', ordenpen);
+        setOrdens(ordenpen);
+        const ordenPro = await devuelveOrdenes('S'); // busco las procesada
+        console.log('Procesada..', ordenPro);
+        setOrdensPro(ordenPro);
+    }
 
     const devuelveOrdenes = async (ind) => {
 
@@ -116,8 +124,9 @@ const List_ordenes = () => {
                             <article className='group__article' onClick={() => clickPagar(list._id, list.total)}>
                                 <ul className='detalle__pedidos'>
                                     <li className='list__detalles'><span className='tittle__span'>Nombre:</span> <span>{list.name}</span></li>
-                                    <li className='list__detalles'><span className='tittle__span'>Tipo : </span>  <span>{list.orderType}</span></li>
+                                    <li className='list__detalles'><span className='tittle__span'>Tipo : </span>  <span>{tipo_orden[list.orderType]}</span></li>
                                     <li className='list__detalles'><span className='tittle__span'>Total : </span><span>{list.total}</span></li>
+                                    <li className='list__detalles'><span className='tittle__span'>#</span><span>{list.num_orden}</span></li>  
                                 </ul>
 
                                 <div className='orden__pedido pedidos_ordenes'>
