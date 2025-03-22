@@ -27,7 +27,7 @@ const DetalleOrden = () => {
     const [tiporden, setTiporden] = useState({});
     const [ordenType, setOrdenType] = useState(1);
     const [deliv, setDeliv] = useState('');
-    const [changeCheck, useChangeCheck] = useState(false);
+    const [changeCheck, setChangeCheck] = useState(false);
     const [nombre, setNombre] = useState('En mesa');
     const [mdelivery, setMdelivery] = useState(0);
     const navigate = useNavigate();
@@ -42,7 +42,7 @@ const DetalleOrden = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [cursorPos, setCursorPos] = useState({ start: 0, end: 0 });
     const [arrayAlitas, setArrayAlitas] = useState([]);
-    const [tipoAlitas, setTipoAlitas] = useState(['Full picantes', 'Medio picantes', 'Poco picantes','Broster','Naturales']);
+    const [tipoAlitas, setTipoAlitas] = useState(['Full picantes', 'Medio picantes', 'Poco picantes', 'Broster', 'Naturales']);
     const [selectedAlitas, setSelectedAlitas] = useState([]);
 
 
@@ -142,18 +142,8 @@ const DetalleOrden = () => {
             }
         });
 
-        //limpiarEstados();
-
         //handleClose();
 
-    }
-
-    const limpiarEstados = () => {
-        setObservation({});
-        setQingredientes([]);
-        setAingredientes([]);
-        setSelectedHamburguesa([]);
-        setEIngredienteHamburguesa([]);
     }
 
     const buscarOrden = async (id) => {
@@ -180,8 +170,6 @@ const DetalleOrden = () => {
 
             setArrayAlitas(array_alas);
 
-
-            //setCantidadHamburguesa(data.ordens[0].items[0].cantidad_hamburguesa);
         } else {
             console.log('error');
         }
@@ -233,6 +221,7 @@ const DetalleOrden = () => {
 
         if (tipo == 1) {
             setNombre('En mesa');
+            setChangeCheck(false);
         } else {
             setNombre('');
         }
@@ -480,13 +469,13 @@ const DetalleOrden = () => {
                 }
 
                 if (checkPago) {
-        
+
                     navigate('/rousse/pagar', { state: { idOrden } });
-        
+
                 } else {
                     let valor = 1;
                     navigate('/rousse/success', { state: { valor } });
-        
+
                 }
             }
         }
@@ -514,7 +503,7 @@ const DetalleOrden = () => {
         e.preventDefault();
         checkInventario();
         actualizaDetalle();
-       
+
     }
 
     useEffect(() => {
@@ -543,10 +532,10 @@ const DetalleOrden = () => {
         });
     };
 
-    const handleAlitas = (evento, indexQ,idmenu) => {    
-        const isChecked = evento.target.checked;   
+    const handleAlitas = (evento, indexQ, idmenu) => {
+        const isChecked = evento.target.checked;
         const alas = evento.target.value;
-        
+
         setSelectedAlitas(prevState => {
             const updatedState = { ...prevState };
 
@@ -562,7 +551,7 @@ const DetalleOrden = () => {
 
             return updatedState;
         });
-       
+
     }
 
     const handleCheckboxChange = (evento, items, index, idmenu) => {
@@ -729,20 +718,26 @@ const DetalleOrden = () => {
                                         })}
 
                                         <Seccion key={indexQ} indexQ={indexQ} id_menu={selectedItem.id_menu._id} setObservation={setObservation} observation={observation} cursorPos={cursorPos} setCursorPos={setCursorPos} />
-                                       
+
                                         {arrayAlitas.includes(selectedItem.id_menu._id) &&
                                             <div className='alitas__container'>
-                                                <label className='alitas__label'>Alitas</label>
-                                                {tipoAlitas.map((alita, index) => {
-                                                    return (
-                                                        <div className='alitas__item' key={index}>
-                                                            <input type="checkbox" name='alitas' id='alitas' value={alita} 
-                                                            checked={selectedAlitas[selectedItem.id_menu._id]?.[indexQ]?.includes(alita) || false}
-                                                            onChange={(e) => handleAlitas(e,indexQ, selectedItem.id_menu._id)} />
-                                                            <label htmlFor="alitas">{alita}</label>
-                                                        </div>
-                                                    )
-                                                })}
+                                                <div className='descrip__alas'>
+                                                    <label className='alitas__label'>Alitas</label>
+                                                </div>
+
+                                                <ul className='alitas__list'>
+                                                    {tipoAlitas.map((alita, index) => {
+                                                        return (
+                                                            <li className='alitas__item' key={index}>
+                                                                <input type="checkbox" name='alitas' id='alitas' value={alita}
+                                                                    checked={selectedAlitas[selectedItem.id_menu._id]?.[indexQ]?.includes(alita) || false}
+                                                                    onChange={(e) => handleAlitas(e, indexQ, selectedItem.id_menu._id)} 
+                                                                    className='alitas__check'/>
+                                                                <label htmlFor="alitas" >{alita}</label>
+                                                            </li>
+                                                        )
+                                                    })}
+                                                </ul>
                                             </div>
                                         }
                                     </div>
@@ -782,7 +777,7 @@ const DetalleOrden = () => {
                         <div className='detalle__section'>
                             {(ordenType != 1 && ordenType != 4) &&
                                 <div className="form-check form-switch">
-                                    <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={e => useChangeCheck(e.target.checked)} checked={changeCheck} />
+                                    <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={e => setChangeCheck(e.target.checked)} checked={changeCheck} />
                                     <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Delivery?</label>
                                 </div>
                             }

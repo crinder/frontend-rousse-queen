@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Global from '../../helpers/Global';
 import moment from 'moment';
 
-const Detalles = ({id_caja}) => {
+const Detalles = ({ id_caja }) => {
     const token = localStorage.getItem('token');
     const tasa = localStorage.getItem('rate');
     const [noPagada, setNoPagada] = useState(0);
@@ -99,130 +99,156 @@ const Detalles = ({id_caja}) => {
             {success &&
 
                 <div className='div__movimientos'>
-                    <table className='table__movimientos'>
-                        <thead className='movimientos__head'>
-                            <tr className='movimientos__tr'>
-                                <th className='movimientos__th'>Forma de pago</th>
-                                <th className='movimientos__th'>Bolivares</th>
-                                <th className='movimientos__th'>Divisas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Pendientes: </td>
-                                <td>-</td>
-                                <td>{pendiente}</td>
-                            </tr>
+                    <div className='table__container'>
+                        <div className='container__title centrar'>
+                            <span className='title__color title__pagar title__detalle'>Detalle de ingresos</span>
+                        </div>
 
-                            <tr>
-                                <td>Divisas</td>
-                                <td>-</td>
-                                <td>{totalesUS}</td>
-                            </tr>
+                        <table className='table__movimientos'>
+                            <thead className='movimientos__head'>
+                                <tr className='movimientos__tr'>
+                                    <th className='movimientos__th'>Forma de pago</th>
+                                    <th className='movimientos__th'>Bolivares</th>
+                                    <th className='movimientos__th'>Divisas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Pendientes: </td>
+                                    <td>-</td>
+                                    <td>{pendiente}</td>
+                                </tr>
 
-                            <tr>
-                                <td>Pago movil: </td>
-                                <td>{totalPagoMov}</td>
-                                <td>-</td>
-                            </tr>
+                                <tr>
+                                    <td>Divisas</td>
+                                    <td>-</td>
+                                    <td>{totalesUS}</td>
+                                </tr>
 
-                            <tr>
-                                <td>bs efectivo: </td>
-                                <td>{noPagada}</td>
-                                <td>-</td>
-                            </tr>
+                                <tr>
+                                    <td>Pago movil: </td>
+                                    <td>{totalPagoMov}</td>
+                                    <td>-</td>
+                                </tr>
 
-                        </tbody>
+                                <tr>
+                                    <td>bs efectivo: </td>
+                                    <td>{noPagada}</td>
+                                    <td>-</td>
+                                </tr>
 
-                        <tfoot>
+                            </tbody>
 
-                            <tr>
-                                <td>subTotal :</td>
-                                <td>{totalCreditoBs}</td>
-                                <td>{totalCredito}</td>
-                            </tr>
+                            <tfoot>
 
-                            <tr>
-                                <td>Bs = divisas:</td>
-                                <td>{bsDivisas}</td>
-                                <td>{totalCredito}</td>
-                            </tr>
+                                <tr>
+                                    <td>subTotal :</td>
+                                    <td>{totalCreditoBs}</td>
+                                    <td>{totalCredito}</td>
+                                </tr>
 
-                            <tr>
-                                <td>Total:</td>
-                                <td></td>
-                                <td>{totalCredito + bsDivisas}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                <tr>
+                                    <td>Bs = divisas:</td>
+                                    <td>{bsDivisas}</td>
+                                    <td>{totalCredito}</td>
+                                </tr>
 
-                    <table className='table__movimientos'>
-                        <thead className='movimientos__head'>
-                            <tr className='movimientos__tr'>
-                                <th className='movimientos__th'>Concepto</th>
-                                <th className='movimientos__th'>Bolivares</th>
-                                <th className='movimientos__th'>Divisas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                                <tr>
+                                    <td>Total:</td>
+                                    <td colSpan={2}>{totalCredito + bsDivisas}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                            <tr>
-                                <td>Otros pagos</td>
-                                <td>{otrosPagosBS}</td>
-                                <td>{otrosPagosUS}</td>
-                            </tr>
+                    <div>
 
-                            <tr>
-                                <td>Delivery</td>
-                                <td>0</td>
-                                <td>{delivery}</td>
-                            </tr>
+                        <div className='container__title centrar'>
+                            <span className='title__color title__pagar title__detalle'>Detalle de egresos</span>
+                        </div>
 
-                        </tbody>
-                    </table>
+                        <table className='table__movimientos'>
+                            <thead className='movimientos__head'>
+                                <tr className='movimientos__tr'>
+                                    <th className='movimientos__th'>Concepto</th>
+                                    <th className='movimientos__th'>Bolivares</th>
+                                    <th className='movimientos__th'>Divisas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-                    <table className='table__movimientos'>
-                        <thead className='movimientos__head'>
-                            <tr className='movimientos__tr'>
-                                <th className='movimientos__th'>Balance</th>
-                                <th className='movimientos__th'>Ingreso</th>
-                                <th className='movimientos__th'>Egreso</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                                <tr>
+                                    <td className='movimientos__td'>Otros pagos</td>
+                                    <td className='movimientos__td'>{otrosPagosBS}</td>
+                                    <td className='movimientos__td'>{otrosPagosUS}</td>
+                                </tr>
 
-                            <tr>
-                                <td>Total ingreso</td>
-                                <td>{totalCredito + bsDivisas}</td>
-                                <td>-</td>
-                            </tr>
+                                <tr>
+                                    <td className='movimientos__td'>Delivery</td>
+                                    <td className='movimientos__td'>0</td>
+                                    <td className='movimientos__td'>{delivery}</td>
+                                </tr>
 
-                            <tr>
-                                <td>Total egreso</td>
-                                <td>-</td>
-                                <td>{otrosPagosUS}</td>
-                            </tr>
+                                <tr>
+                                    <td className='movimientos__td'>Total:</td>
+                                    <td className='movimientos__td' colSpan={2}>{otrosPagosUS+delivery}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                            <tr>
-                                <td>Total delivery</td>
-                                <td>-</td>
-                                <td>{delivery}</td>
-                            </tr>
+                    </div>
 
-                            <tr>
-                                <td>Total general</td>
-                                <td>{(totalCredito + bsDivisas) - otrosPagosUS - delivery}</td>
-                            </tr>
+                    <div>
 
-                        </tbody>
-                    </table>
+                        <div className='container__title centrar'>
+                            <span className='title__color title__pagar title__detalle'>Balance</span>
+                        </div>
+
+                        <table className='table__movimientos'>
+                            <thead className='movimientos__head'>
+                                <tr className='movimientos__tr'>
+                                    <th className='movimientos__th'>Balance</th>
+                                    <th className='movimientos__th'>Ingreso</th>
+                                    <th className='movimientos__th'>Egreso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td className='movimientos__td'>Total ingreso</td>
+                                    <td className='movimientos__td'>{totalCredito + bsDivisas}</td>
+                                    <td className='movimientos__td'>-</td>
+                                </tr>
+
+                                <tr>
+                                    <td className='movimientos__td'>Total egreso</td>
+                                    <td className='movimientos__td'>-</td>
+                                    <td className='movimientos__td'>{otrosPagosUS}</td>
+                                </tr>
+
+                                <tr>
+                                    <td className='movimientos__td'>Total delivery</td>
+                                    <td className='movimientos__td'>-</td>
+                                    <td className='movimientos__td'>{delivery}</td>
+                                </tr>
+
+                                <tr>
+                                    <td className='movimientos__td'>Total general</td>
+                                    <td className='movimientos__td' colSpan={2}>{(totalCredito + bsDivisas) - otrosPagosUS - delivery}</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             }
 
             {datosordenes && datosordenes.length > 0 &&
 
                 <div>
-                    <span>Listado de pedidos</span>
+                    <div className='container__title centrar'>
+                        <span className='title__color title__pagar title__detalle'>Detalle de pedidos</span>
+                    </div>
 
                     <table className='table__movimientos'>
 
@@ -236,6 +262,7 @@ const Detalles = ({id_caja}) => {
                                 <th className='movimientos__th'>Estado</th>
                                 <th className='movimientos__th'>Fecha</th>
                                 <th className='movimientos__th'>Delivery</th>
+                                <th className='movimientos__th'>Referencia</th>
                                 <th className='movimientos__th'>Total</th>
                             </tr>
                         </thead>
@@ -245,15 +272,16 @@ const Detalles = ({id_caja}) => {
                             {datosordenes && datosordenes.length > 0 && datosordenes.map(orden => {
                                 return (
                                     <tr>
-                                        <td>{orden.num_orden}</td>
-                                        <td>{paymement_method[orden.paymement_method]}</td>
-                                        <td>{orden.name}</td>
-                                        <td>{tipo_orden[orden.orderType]}</td>
-                                        <td>{orden.items && orden.items.length > 0 && orden.items.map(item => item.description).join(', ')}</td>
-                                        <td>{c_status[orden.status]}</td>
-                                        <td>{moment(orden.create_at).format('DD-MM-YYYY HH:mm:ss')}</td>
-                                        <td>{orden.domicilio && orden.domicilio.length > 0 ? orden.domicilio.map(item => item.zona + ' ' + item.cost_delivery + '$').join(', ') : '-'}</td>
-                                        <td>{orden.total}</td>
+                                        <td className='movimientos__td'>{orden.num_orden}</td>
+                                        <td className='movimientos__td'>{paymement_method[orden.paymement_method]}</td>
+                                        <td className='movimientos__td'>{orden.name}</td>
+                                        <td className='movimientos__td'>{tipo_orden[orden.orderType]}</td>
+                                        <td className='movimientos__td'>{orden.items && orden.items.length > 0 && orden.items.map(item => item.description).join(', ')}</td>
+                                        <td className='movimientos__td'>{c_status[orden.status]}</td>
+                                        <td className='movimientos__td'>{moment(orden.create_at).format('DD-MM-YYYY HH:mm:ss')}</td>
+                                        <td className='movimientos__td'>{orden.domicilio && orden.domicilio.length > 0 ? orden.domicilio.map(item => item.zona + ' ' + item.cost_delivery + '$').join(', ') : '-'}</td>
+                                        <td className='movimientos__td'>{orden.numrefere ? orden.numrefere : '-'}</td>
+                                        <td className='movimientos__td'>{orden.total}</td>
                                     </tr>
 
                                 )
@@ -269,7 +297,9 @@ const Detalles = ({id_caja}) => {
             {pagos && pagos.length > 0 &&
 
                 <div>
-                    <span>Listado de pagos</span>
+                    <div className='container__title centrar'>
+                        <span className='title__color title__pagar title__detalle'>Detalle de pagos</span>
+                    </div>
 
                     <table className='table__movimientos'>
 
@@ -288,11 +318,11 @@ const Detalles = ({id_caja}) => {
                             {pagos && pagos.length > 0 && pagos.map(pag => {
                                 return (
                                     <tr>
-                                        <td>{pag.pago.descrip}</td>
-                                        <td>{pag.total}</td>
-                                        <td>{pag.total_money}</td>
-                                        <td>{pag.total_local}</td>
-                                        <td>{pag.observacion}</td>
+                                        <td className='movimientos__td'>{pag.pago.descrip}</td>
+                                        <td className='movimientos__td'>{pag.total}</td>
+                                        <td className='movimientos__td'>{pag.total_money}</td>
+                                        <td className='movimientos__td'>{pag.total_local}</td>
+                                        <td className='movimientos__td'>{pag.observacion}</td>
                                     </tr>
 
                                 )

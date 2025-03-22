@@ -7,7 +7,7 @@ const DetailCaja = () => {
 
     return (
         <div>
-            <Detalles id_caja={id_caja}  />
+            <Detalles id_caja={id_caja} />
         </div >
     )
 }

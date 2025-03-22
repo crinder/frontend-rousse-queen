@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Global from '../../helpers/Global';
 import useForm from '../../assets/hooks/useForm';
-import Multiselect from 'multiselect-react-dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faRotateRight, faCheckToSlot } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import Message from '../Util/Message';
 
 
 const Hamburguesas = () => {
@@ -13,13 +13,25 @@ const Hamburguesas = () => {
     const token = localStorage.getItem("token");
     const { form, changed } = useForm({});
     const navigate = useNavigate();
+    const [showAlert, setShowAlert] = useState(false);
+    const [variant, setVariant] = useState();
+    const [message, setMessage] = useState();
 
     useEffect(() => {
         devuelveHamburguesas();
     }, []);
 
-    const devuelveHamburguesas = async () => {
+    const handleAlert = () => {
+        setShowAlert(true);
 
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }
+
+    const devuelveHamburguesas = async () => {
 
         let sucursal = 1;
 
@@ -37,8 +49,11 @@ const Hamburguesas = () => {
         if (data.status == "success") {
             setHamburguesas(data.menu);
         } else {
-            console.log('error');
+            setMessage('Error al cargar el menu');
+            setVariant('Error');
+            handleAlert();
         }
+        
 
     }
 
@@ -58,45 +73,55 @@ const Hamburguesas = () => {
         const dataElimnar = await requestEliminar.json();
 
         if (dataElimnar.status == 'success') {
+            setMessage('Menu eliminado');
+            setVariant('Correcto');
             devuelveHamburguesas();
         } else {
             console.log('error');
         }
+        handleAlert();
     }
 
     const CrearMenu = async (e) => {
         e.preventDefault();
-    
+
         let body = form;
-    
+
         body.hamburguesa = 'S';
-    
+
         if (body.description.length == 0) {
-          console.log('debe ingresar un nombre');
-          return
+            console.log('debe ingresar un nombre');
+            return
         }
-    
+
         const requestMenu = await fetch(Global.url + 'menu/register/', {
-    
-          method: "POST",
-          body: JSON.stringify(body),
-          headers: {
-            "authorization": token,
-            "Content-Type": "application/json"
-          }
-    
+
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "authorization": token,
+                "Content-Type": "application/json"
+            }
+
         });
-    
+
         const dataMenu = await requestMenu.json();
-    
+
         if (dataMenu.status == 'success') {
-          devuelveHamburguesas();
+            devuelveHamburguesas();
+            setMessage('hamburguesa guardada');
+            setVariant('Correcto');
+        } else {
+            setMessage('Error al guardar la hamburguesa');
+            setVariant('Error');
         }
-    
-      }
+        handleAlert();
+    }
 
     return (
         <div className='articulos__articulos'>
+
+            <Message showAlert={showAlert} tipo={variant} message={message} />
 
             <section className='articulos__container'>
 
@@ -104,26 +129,29 @@ const Hamburguesas = () => {
                     <span className='title__color--title'>Configura el menú</span>
                 </header>
 
-                {hamburguesas.map(menu => {
+                <table className='table__movimientos'>
+                    <thead className='movimientos__head'>
+                        <tr className='movimientos__tr'>
+                            <th className='movimientos__th'>Menu</th>
+                            <th className='movimientos__th'>Eliminar?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                    return (
-                        <section className="card__menu" key={menu._id} >
+                        {hamburguesas.map(menu => {
 
-                            <article className='title__menu title__menu--menu' onClick={() => det_menu(menu._id, menu.description)}>
-                                <span className='title__color title__color--subtitle'>{menu.description}</span>
+                            return (
+                                <tr key={menu._id}>
+                                    <td onClick={() => det_menu(menu._id, menu.description)} key={menu._id}>{menu.description}</td>
+                                    <td><span className='' onClick={() => eliminar(menu._id)}><FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' /></span></td>
+                                </tr>
 
-                            </article>
+                            )
+                        })
 
-                            <article className='title__menu'>
-                                <span className='icon__menu' onClick={() => eliminar(menu._id)}><FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' /></span>
-                            </article>
-
-                        </section>
-
-                    )
-                })
-
-                }
+                        }
+                    </tbody>
+                </table>
             </section>
 
             <div className='articulos__articulos'>

@@ -207,7 +207,7 @@ const Ordenes = () => {
                                     <span className='menu__precio'>Precio: {opcion.price}</span>
                                     <div className='select__select'>
                                         <FontAwesomeIcon icon={faMinus} className='menu__icon--select' onClick={() => decrementar(opcion._id)} />
-                                        <span className='select__opcion'>{cantidad[opcion._id]?.quantity || 0}</span>
+                                            <span className='select__opcion'>{cantidad[opcion._id]?.quantity || 0}</span>
                                         <FontAwesomeIcon icon={faPlus} className='menu__icon--select' onClick={() => incrementar(opcion._id)} />
                                     </div>
 

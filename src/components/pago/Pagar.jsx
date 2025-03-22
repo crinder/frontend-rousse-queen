@@ -17,6 +17,7 @@ const Pagar = () => {
     const [recibidoUS, setRecibido] = useState(0);
     const [recibidoBS, setRecibidoBS] = useState(0);
     const [tasa, setTasa] = useState(0);
+    const [numrefere, setNumrefere] = useState('');
 
     const location = useLocation();
     const token = localStorage.getItem("token");
@@ -106,7 +107,7 @@ const Pagar = () => {
             console.log(resto);
 
             total = total + resto;
-            
+
 
             if (isNaN(total)) {
                 setVueltoUs1(0);
@@ -158,9 +159,7 @@ const Pagar = () => {
     const changedRecibidoBs = (event) => {
 
         const newReciboBS = event.target.value;
-        /*setRecibidoBS(newReciboBS);
-        setVueltoUs(0);
-        setVueltoBs(0);*/
+
     }
 
     /* fin pagos */
@@ -202,6 +201,24 @@ const Pagar = () => {
         } else {
             setSaved("error");
         }
+    }
+
+    const formatNumber = (number) => {
+        const numericValue = number.replace(/[^0-9]/g, '');
+        let formattedValue = '';
+        for (let i = numericValue.length - 1; i >= 0; i--) {
+            formattedValue = numericValue[i] + formattedValue;
+            if ((numericValue.length - i) % 4 === 0 && i !== 0) {
+                formattedValue = ',' + formattedValue;
+            }
+        }
+        return formattedValue;
+    }
+
+    const changedNumrefere = (e) => {
+        e.target.value = formatNumber(e.target.value);
+        setNumrefere(e.target.value);
+
     }
 
     const validaMontos = () => {
@@ -267,6 +284,8 @@ const Pagar = () => {
             return
         }
 
+
+
         let c_body = {
             paymement_method: paymement,
             rate: tasa,
@@ -277,6 +296,7 @@ const Pagar = () => {
             received_money: recibidoUS,
             change_local: vueltoBs,
             change_money: vueltoUs,
+            numrefere: numrefere,
             status: 2 // pagada
         }
 
@@ -359,7 +379,6 @@ const Pagar = () => {
                         {paymement == 2 && (
                             <section className='method__pago'>
 
-
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido</label>
                                     <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required />
@@ -388,24 +407,33 @@ const Pagar = () => {
                                     <label htmlFor="total_local" className='label__form'>Monto Bs.</label>
                                     <input type="text" name='total_local' id='total_local' className='input__form' readOnly value={recibidoBS} />
                                 </div>
+                                <div className='content__field'>
+                                    <label htmlFor="numrefere" className='label__form'>Número de referencia</label>
+                                    <input type="text" name='numrefere' id='numrefere' className='input__form' onChange={e => changedNumrefere(e)} required />
+                                </div>
                             </section>
                         )}
 
                         {paymement == 3 && (
                             <section className='method__pago'>
                                 <div className='content__field'>
-                                    <label htmlFor="received_money" className='label__form'>Recibido US</label>
+                                    <label htmlFor="received_money" className='label__form'>Recibido $</label>
                                     <input type="text" name='received_money' id='received_money' className='input__form' onChange={changedRecibidoUs} value={recibidoUS} required />
                                 </div>
 
                                 <div className='content__field'>
                                     <label htmlFor="received_money" className='label__form'>Recibido BS</label>
-                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required value={recibidoBS} readOnly/>
+                                    <input type="text" name='received_local' id='received_local' className='input__form' onChange={changedRecibidoBs} required value={recibidoBS} readOnly />
                                 </div>
 
                                 <div className='content__field'>
-                                    <label htmlFor="received_money" className='label__form'>Vuelto US</label>
+                                    <label htmlFor="received_money" className='label__form'>Vuelto $</label>
                                     <input type="text" name='change_local' id='change_local' className='input__form' onChange={changedVueltoUs} value={vueltoUs1} required />
+                                </div>
+
+                                <div className='content__field'>
+                                    <label htmlFor="numrefere" className='label__form'>Referencia</label>
+                                    <input type="text" name='numrefere' id='numrefere' className='input__form' onChange={e => changedNumrefere(e)} required />
                                 </div>
 
                             </section>

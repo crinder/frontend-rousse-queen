@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useForm from '../../assets/hooks/useForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import Message from '../Util/Message';
 
 const Menu = () => {
 
@@ -11,6 +12,9 @@ const Menu = () => {
   const [menus, setMenus] = useState([]);
   const { form, changed } = useForm({});
   const [hamburguesa, setHamburguesa] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [variant, setVariant] = useState();
+  const [message, setMessage] = useState();
 
 
   let token = localStorage.getItem('token');
@@ -21,6 +25,16 @@ const Menu = () => {
 
     listar();
   }, []);
+
+  const handleAlert = () => {
+    setShowAlert(true);
+
+    setTimeout(() => {
+      setShowAlert(false);
+      setMessage('');
+      setVariant('');
+    }, 5000);
+  }
 
 
   const listar = async () => {
@@ -88,9 +102,12 @@ const Menu = () => {
     const dataMenu = await requestMenu.json();
 
     if (dataMenu.status == 'success') {
+      setMessage('Menu guardado');
+      setVariant('Correcto');
       listar();
     }
 
+    handleAlert();
 
   }
 
@@ -108,13 +125,23 @@ const Menu = () => {
     const dataElimnar = await requestEliminar.json();
 
     if (dataElimnar.status == 'success') {
+      setMessage('Menu eliminado');
+      setVariant('Correcto');
       listar();
+    } else {
+      setVariant('Error');
+      setMessage(dataElimnar.message);
     }
+
+
+    handleAlert();
 
   }
 
   return (
     <div className='articulos__articulos'>
+
+      <Message showAlert={showAlert} tipo={variant} message={message} />
 
       <section className='articulos__container'>
 
@@ -169,7 +196,15 @@ const Menu = () => {
                   <label htmlFor="price" className='input__label'>Precio</label>
                 </div>
 
-                <input type="submit" className='user__button' value="Crear articulo" />
+                <input type="submit" className='user__button' value="Crear menu" />
+
+                <section className=''>
+
+                    <div className='div__hamburguesa'>
+                      <span className='user__button' onClick={() => crearHamburguesa()}>Crear hamburguesa?</span>
+                    </div>
+
+                  </section>
 
               </form>
 
@@ -178,16 +213,6 @@ const Menu = () => {
           </section>
         </div>
 
-        <div className='articulos__articulos'>
-
-          <section className='articulos__container'>
-
-            <header className='articulo_headers'>
-              <span className='title__color--title' onClick={() => crearHamburguesa()}>Agrega hamburguesa</span>
-            </header>
-
-          </section>
-        </div>
       </section>
     </div>
   )

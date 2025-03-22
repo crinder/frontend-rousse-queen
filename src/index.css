@@ -80,8 +80,6 @@ body {
   box-shadow: 1px 1px 5px gray inset;
   border-radius: 5rem;
   box-shadow: 0 0 50px -1px rgb(191, 155, 95);
-  overflow: auto;
-
 }
 
 
@@ -104,6 +102,10 @@ body {
 
 .articulo_headers {
   margin-top: 5rem;
+}
+
+.div__hamburguesa{
+  margin-bottom: 3rem;
 }
 
 .user__label {
@@ -518,17 +520,6 @@ body {
 
 }
 
-.articulo__list:hover {
-  background-color: var(--color-secundary);
-  color: var(--color-principal);
-}
-
-
-
-.articulo__list:hover .articulo__item {
-  border-right: 1px solid var(--color-principal);
-}
-
 .articulo__item:last-child {
   border-right: none;
 }
@@ -872,6 +863,9 @@ body {
   width: 70%;
 }
 
+.title__detalle{
+  font-size: 3rem !important;
+}
 
 .orden__det {
   display: flex;
@@ -1401,10 +1395,7 @@ tr:hover {
 .modal__ingredientes {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
   flex-wrap: wrap;
-  margin-left: 2rem;
-  margin-right: 2rem;
   color: var(--color-secundary);
 }
 
@@ -1414,7 +1405,7 @@ tr:hover {
 }
 
 .checkbox__ingredientes {
-  margin-right: 3rem;
+  margin-right: 1.5rem;
 }
 
 .modal__select {
@@ -1436,7 +1427,8 @@ tr:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  margin-top: 5rem;
 }
 
 .ingredientes__input {
@@ -1497,4 +1489,184 @@ tr:hover {
   top: 50px;
   right: 50px;
   font-size: 4rem;
+}
+
+.movimientos__th{
+  font-size: 2rem;
+}
+
+.toast-toast {
+  position: absolute;
+  top: 25px;
+  right: 0px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 20px 35px 20px 25px;
+  box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transform: translateX(calc(100% + 30px));
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.35);
+  z-index: 999;
+}
+
+.toast-toast.active {
+  transform: translateX(0%);
+}
+
+.toast-toast .toast-content {
+  display: flex;
+  align-items: center;
+}
+
+.toast-content .check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  min-width: 35px;
+  background-color: #4070f4;
+  color: #fff;
+  font-size: 20px;
+  border-radius: 50%;
+}
+
+.toast-content .message {
+  display: flex;
+  flex-direction: column;
+  margin: 0 20px;
+}
+
+.message .text {
+  font-size: 16px;
+  font-weight: 400;
+  color: #666666;
+}
+
+.message .text.text-1 {
+  font-weight: 600;
+  color: #333;
+}
+
+.toast-toast .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  padding: 5px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.toast-toast .close:hover {
+  opacity: 1;
+}
+
+.toast-toast .progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+
+}
+
+.toast-toast .progress:before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.toast-toast .progress-error:before {
+  background-color: red;
+}
+
+.toast-toast .progress-danger:before {
+  background-color: yellow;
+}
+
+.toast-toast .progress-success:before {
+  background-color: green;
+}
+
+
+.progress.active:before {
+  animation: progress 5s linear forwards;
+}
+
+@keyframes progress {
+  100% {
+    right: 100%;
+  }
+}
+
+.button-success {
+  padding: 12px 20px;
+  font-size: 20px;
+  outline: none;
+  background-color: #4070f4;
+  color: #fff;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 300ms ease-in-out;
+}
+
+.align__div {
+  display: flex;
+  justify-content: center;
+}
+
+.button-success:hover {
+  background-color: #2355e0;
+}
+
+.toast-toast.active~button {
+  pointer-events: none;
+}
+
+/**FIN ALERT**/
+
+.hamburguesa__button{
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dddddd;
+  border-radius: 1rem;
+  margin-top: 5rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.crear__hamburguesa{
+  margin-top: 3rem; 
+  height: 40rem !important;
+}
+
+.alitas__list{
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.descrip__alas{
+  margin-bottom: 1rem;
+}
+
+.alitas__label{
+  color: var(--color-secundary);
+  font-size: 2rem;
+}
+
+.alitas__check{
+  margin-right: 1rem;
+  margin-left: 0.5rem;
+}
+
+.alitas__item{
+  margin-right: 1rem;
+}
+
+.ingredientes__detalle{
+  width: 50%;
 }

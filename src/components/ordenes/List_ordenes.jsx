@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { IconView } from '../Util/Iconos';
-import moment from 'moment';
+import Message from '../Util/Message';
 
 const List_ordenes = () => {
 
@@ -19,6 +19,19 @@ const List_ordenes = () => {
         2: 'Fiado sin abono',
         3: 'Mas tarde',
         4: 'Delivery'
+    }
+    const [message, setMessage] = useState();
+    const [variant, setVariant] = useState();
+    const [showAlert, setShowAlert] = useState(false);
+
+    const handleAlert = () => {
+        setShowAlert(true);
+
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
     }
 
     const toggleEliminar = (id) => {
@@ -45,9 +58,17 @@ const List_ordenes = () => {
 
         const dataDel = await requestDel.json();
 
-
+        if (dataDel.status == "success") {
+            setMessage('Orden eliminada');
+            setVariant('Correcto');
+            devuelveOrdenes('P');
+            devuelveOrdenes('S');
+        } else {
+            setMessage('Error al eliminar la orden');
+            setVariant('errror');
+        }
+        handleAlert();
         fecthOrden();
-
     }
 
     useEffect(() => {
@@ -58,10 +79,8 @@ const List_ordenes = () => {
     const fecthOrden = async () => {
 
         const ordenpen = await devuelveOrdenes('P'); // busco las pendiente
-        console.log('pendientes...', ordenpen);
         setOrdens(ordenpen);
         const ordenPro = await devuelveOrdenes('S'); // busco las procesada
-        console.log('Procesada..', ordenPro);
         setOrdensPro(ordenPro);
     }
 
@@ -103,8 +122,6 @@ const List_ordenes = () => {
 
         }
 
-        console.log(data.ordens);
-
     }
 
     const detailOrden = (id) => {
@@ -113,8 +130,10 @@ const List_ordenes = () => {
 
     return (
         <div className='orden__crear'>
+            <Message showAlert={showAlert} tipo={variant} message={message} />
+            
             <span className='title__color title__pagar'>Ordenes pendientes del dia</span>
-
+            
             <section className='list__ordens'>
 
                 {ordens && ordens.length > 0 && ordens.map((list, index) => {

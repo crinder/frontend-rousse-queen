@@ -5,10 +5,12 @@ import Multiselect from 'multiselect-react-dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faRotateRight, faCheckToSlot } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router-dom';
+import Message from '../Util/Message';
 
 
 const Det_hamburguesa = () => {
 
+    let token = localStorage.getItem('token');
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
     const [opciones, setOpciones] = useState([]);
     const location = useLocation();
@@ -17,8 +19,22 @@ const Det_hamburguesa = () => {
     const [opcional, setOpcional] = useState('');
     const [hamburguesa, setHamburguesa] = useState(false);
     const [elegir, setElegir] = useState(false);
+    const [message, setMessage] = useState();
+    const [variant, setVariant] = useState();
+    const [showAlert, setShowAlert] = useState(false);
+
     let id_menu = location.state.idmenu;
     let nombre = 0;
+
+    const handleAlert = () => {
+        setShowAlert(true);
+
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }
 
     useEffect(() => {
 
@@ -56,19 +72,16 @@ const Det_hamburguesa = () => {
             const obj = {
                 id_article: opcion.id
             }
-
-            //deletetMenu(obj);
         }
 
         setOpcionesSeleccionadas(selectedList);
     }
 
-    const [saved, setSaved] = useState("");
     const [detmenus, setDetmenus] = useState("");
     const [articles, setArticles] = useState("");
     const [guardado, setGuardado] = useState("");
 
-    let token = localStorage.getItem('token');
+   
 
     useEffect(() => {
         devuelveDetalle();
@@ -76,7 +89,6 @@ const Det_hamburguesa = () => {
     }, [guardado]);
 
     const deleteArt = async (id_article) => {
-
 
         let obj = {
             id_article: id_article
@@ -94,17 +106,20 @@ const Det_hamburguesa = () => {
         const dataDel = await requestDel.json();
 
         if (dataDel.status == "success") {
+            setMessage('producto eliminado');
+            setVariant('Correcto');
             devuelveDetalle();
             articulosActualizado();
         } else {
-            setGuardado("error");
+            setMessage('Error al eliminar el producto');
+            setVariant('errror');
         }
+
+        handleAlert();
 
     }
 
     const insertMenu = async (obj) => {
-
-        console.log('insert...' + id_menu);
 
         const request = await fetch(Global.url + 'det-menu/register/' + id_menu, {
             method: "POST",
@@ -120,9 +135,14 @@ const Det_hamburguesa = () => {
         if (data.status == "success") {
             devuelveDetalle();
             articulosActualizado();
+            setMessage('producto actualizado');
+            setVariant('Correcto');
         } else {
-            setGuardado("error");
+            setMessage('Error al actualizar el producto');
+            setVariant('errror');
         }
+
+        handleAlert();
     }
 
 
@@ -140,7 +160,6 @@ const Det_hamburguesa = () => {
 
 
         if (dataArt.status == "success") {
-            setSaved("success");
 
             const opcionesMap = dataArt.listArticle.map(article => ({
 
@@ -151,7 +170,6 @@ const Det_hamburguesa = () => {
             setOpciones(opcionesMap);
 
         } else {
-            setSaved("error");
             setArticles("");
         }
 
@@ -177,8 +195,6 @@ const Det_hamburguesa = () => {
         if (ele) {
             body.elegir = ele;
         }
-
-        console.log(body);
 
         const requestUpdate = await fetch(Global.url + 'det-menu/update/' + iddetmenu, {
             method: "PUT",
@@ -209,25 +225,12 @@ const Det_hamburguesa = () => {
 
 
         if (data.status == "success") {
-            setSaved("success");
             setDetmenus(data.det_menu);
         } else {
-            setSaved("error");
             setDetmenus(data);
         }
     }
 
-    const elegirEntre = (evento, id) => {
-
-        console.log(resta);
-        let opc = evento.target.checked ? 'S' : 'N';
-
-        setElegir({
-            ...resta,
-            [id]: opc
-        });
-
-    }
 
     const articulOpcional = (evento, id) => {
 
@@ -243,10 +246,12 @@ const Det_hamburguesa = () => {
 
     return (
         <div className='articulos__articulos'>
+            
+            <Message showAlert={showAlert} tipo={variant} message={message} />
 
             <section className='articulos__container container__det_menu'>
                 <header className='articulo_headers'>
-                    <span className='title__color--title'>Asociar productos a menu</span>
+                    <span className='title__color--title'>Asociar productos a hamburguesa</span>
                 </header>
 
                 <section className="card__general">
@@ -334,9 +339,9 @@ const Det_hamburguesa = () => {
                 <section className='articulos__container'>
 
                     <header className='articulo_headers'>
-                        <span className='title__color--title'>Agrega productos al menu</span>
+                        <span className='title__color--title'>Agrega productos a hamburguesa</span>
                     </header>
-                    <section className="card__crear">
+                    <section className="card__crear crear__hamburguesa">
 
                         <form className='aside__login aside__crear'>
 
