@@ -864,6 +864,10 @@ body {
   margin-top: 4rem;
 }
 
+.detalle__caja{
+  width: 90%;
+}
+
 .orden--ampliar{
   width: 70%;
 }

@@ -93,10 +93,7 @@ const Hamburguesas = () => {
           devuelveHamburguesas();
         }
     
-    
       }
-
-
 
     return (
         <div className='articulos__articulos'>

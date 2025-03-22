@@ -5,12 +5,14 @@ import Multiselect from 'multiselect-react-dropdown';
 const OtrosPagos = () => {
 
     const token = localStorage.getItem('token');
-    const idcaja = localStorage.getItem('token');
+    const idcaja = localStorage.getItem('idcaja');
+    const tasa = localStorage.getItem('rate');
     const [opciones, setOpciones] = useState([]);
     const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
     const [total, setTotal] = useState();
     const [totalMoney, setTotalMoney] = useState(total);
     const [totalLocal, setTotalLocal] = useState(0);
+    const [observation, setObservation] = useState();  
 
     useEffect(() => {
         devuelvePagos();
@@ -33,7 +35,7 @@ const OtrosPagos = () => {
 
         let totalBS = total - totalMoney;
 
-        if(isNaN(totalBS)){
+        if (isNaN(totalBS)) {
             totalBS = 0;
         }
 
@@ -107,7 +109,8 @@ const OtrosPagos = () => {
             pago: datos,
             total: total,
             total_local: totalLocal,
-            total_money: totalMoney
+            total_money: totalMoney,
+            observacion: observation
         }
 
         console.log(body);
@@ -129,6 +132,19 @@ const OtrosPagos = () => {
         }
     }
 
+    const transforDivisa = (total) => {
+
+        let totalBS = 0;
+
+        if (isNaN(total)) {
+            totalBS = 0;
+        }else{
+            totalBS = total * tasa;
+        }
+
+        setTotalLocal(totalBS);
+    }
+
     return (
         <div className='orden__crear'>
             <form className='crear__orden pagos__tercero' onSubmit={addCuenta}>
@@ -145,20 +161,26 @@ const OtrosPagos = () => {
 
                 </div>
 
-                <div className='content__field--menu pago__tercero--div' >
-                    <input type="text" name='total' pattern="[0-9]*" id='total' className='input__form--menu input__detmenu pago_tercero--input' placeholder=' ' required onChange={totalPagar} />
-                    <label htmlFor="total" className='label__form--detmenu'>Total</label>
+                <div className='content__field--menu'>
+                    <input type="text" name='total_general' id='total_general' className='input__form--menu input__control' placeholder=' ' onChange={e => setTotal( e.target.value)} required />
+                    <label htmlFor="total_general" className='input__label'>Total</label>
                 </div>
 
-                <div className='content__field--menu pago__tercero--div'>
+                <div className='content__field--menu'>
+                    <input type="text" name='total_us' id='total_us' className='input__form--menu input__control' placeholder=' ' onChange={e => setTotalMoney( e.target.value)}  />
+                    <label htmlFor="total_us" className='input__label'>Divisas</label>
+                </div>
 
-                    <input type="text" name='total_money' pattern="[0-9]*" id='total_money' className='input__form--menu input__detmenu pago_tercero--input' placeholder=' ' required value={totalMoney} onChange={e => setTotalMoney(e.target.value)} />
-                    <label htmlFor="total_local" className='label__form--detmenu'>Total US</label>
+                <div className='content__field--menu'>
+                    <input type="text" name='total_bs' id='total_bs' className='input__form--menu input__control' placeholder=' ' onChange={e => setTotalLocal( e.target.value)} />
+                    <label htmlFor="total_bs" className='input__label'>Bs.</label>
                 </div>
-                <div className='content__field--menu pago__tercero--div'>
-                    <input type="text" name='total_local' pattern="[0-9]*" id='total_local' className='input__form--menu input__detmenu pago_tercero--input' placeholder=' ' readOnly value={totalLocal} />
-                    <label htmlFor="total_local" className='label__form--detmenu'>Total BS</label>
+
+                <div className='content__field--menu'>
+                    <textarea type="text" name='observation' id='observation' className='input__form--menu input__control' placeholder=' ' onChange={e => setObservation( e.target.value)} />
+                    <label htmlFor="observation" className='input__label'>Observacion</label>
                 </div>
+                
                 <input type="submit" className="user__button" value="Pagar" />
             </form>
         </div>
