@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import Global from '../../helpers/Global';
 import useForm from '../../assets/hooks/useForm';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import Message from '../Util/Message';
 
 const Listado = () => {
 
     const [lista, setLista] = useState("");
     const [articulos, setArticulos] = useState([]);
     const token = localStorage.getItem('token');
-    const [articulo, setArticulo] = useState("");
     const [artmanual, setArtManual] = useState([]);
     const [articuloAct, setArticuloAct] = useState({});
     const [idsParaActualizar, setIdsParaActualizar] = useState([]);
-    const { form, changed } = useForm({});
+    const [showAlert, setShowAlert] = useState(false);
+    const [variant, setVariant] = useState();
+    const [message, setMessage] = useState();
 
     useEffect(() => {
 
         listar();
     }, []);
 
+    const handleAlert = () => {
+        setShowAlert(true);
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }
 
     const toggleActualizar = (id, valor) => {
 
@@ -60,17 +68,7 @@ const Listado = () => {
 
     }
 
-    const actInve = (evento, id) => {
-
-        setArticuloAct({
-            ...articuloAct,
-            [id]: evento.target.value
-        })
-
-    }
-
     const ActualizarManual = (evento, id) => {
-
 
         const artExist = artmanual.some((seleted) => seleted.id == id);
 
@@ -79,20 +77,19 @@ const Listado = () => {
                 ? artmanual.filter((selected) => selected.id !== id)
                 : [...artmanual, { id: id }]
         );
-
-
     }
 
     const ActualizarArticulo = async (e) => {
 
         e.preventDefault();
 
-        const articulos = form;
-
-        console.log(idsParaActualizar);
-
-        console.log(artmanual);
-
+        if(idsParaActualizar.length == 0 && artmanual.length == 0){
+            
+            setMessage('Debe seleccionar un producto para actualizar');
+            setVariant('Error');
+            handleAlert();
+            return;
+        }
 
         let body = {
             articulos: idsParaActualizar,
@@ -114,12 +111,21 @@ const Listado = () => {
 
         if (dataUpdate.status == 'success') {
             listar();
+            setMessage('Inventario actualizado');
+            setVariant('Correcto');
+        } else {
+            setMessage('Error al actualizar inventario');
+            setVariant('Error');
         }
+
+        handleAlert();
 
     }
 
     return (
         <div className='articulos__container'>
+
+            <Message showAlert={showAlert} tipo={variant} message={message} />
 
             <header className='articulo_headers'>
                 <span className='title__color--title'>Articulos</span>
@@ -194,7 +200,6 @@ const Listado = () => {
                                         </div>
                                     </li>
                                 </ul>
-
                             )
 
                         })

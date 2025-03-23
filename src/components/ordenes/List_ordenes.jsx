@@ -72,7 +72,7 @@ const List_ordenes = () => {
     }
 
     useEffect(() => {
-    
+
         fecthOrden();
     }, []);
 
@@ -129,88 +129,101 @@ const List_ordenes = () => {
     }
 
     return (
-        <div className='orden__crear'>
+        <div>
             <Message showAlert={showAlert} tipo={variant} message={message} />
-            
-            <span className='title__color title__pagar'>Ordenes pendientes del dia</span>
-            
-            <section className='list__ordens'>
 
-                {ordens && ordens.length > 0 && ordens.map((list, index) => {
-                    return (
-                        <section key={index} className='ordens__group'>
+            <div className='orden__crear'>
 
-                            <article className='group__article' onClick={() => clickPagar(list._id, list.total)}>
-                                <ul className='detalle__pedidos'>
-                                    <li className='list__detalles'><span className='tittle__span'>Nombre:</span> <span>{list.name}</span></li>
-                                    <li className='list__detalles'><span className='tittle__span'>Tipo : </span>  <span>{tipo_orden[list.orderType]}</span></li>
-                                    <li className='list__detalles'><span className='tittle__span'>Total : </span><span>{list.total}</span></li>
-                                    <li className='list__detalles'><span className='tittle__span'>#</span><span>{list.num_orden}</span></li>  
-                                </ul>
 
-                                <div className='orden__pedido pedidos_ordenes'>
+                <span className='title__color title__pagar'>Ordenes pendientes del dia</span>
+
+                <section className='list__ordens'>
+
+                    {ordens && ordens.length > 0 && ordens.map((list, index) => {
+                        return (
+                            <section key={index} className='ordens__group'>
+
+                                <article className='group__article' onClick={() => clickPagar(list._id, list.total)}>
+                                    <ul className='detalle__pedidos'>
+                                        <li className='list__detalles'><span className='tittle__span'>Nombre:</span> <span>{list.name}</span></li>
+                                        <li className='list__detalles'><span className='tittle__span'>Tipo : </span>  <span>{tipo_orden[list.orderType]}</span></li>
+                                        <li className='list__detalles'><span className='tittle__span'>Total : </span><span>{list.total}</span></li>
+                                        <li className='list__detalles'><span className='tittle__span'>#</span><span>{list.num_orden}</span></li>
+                                    </ul>
+
+                                    <div className='orden__pedido pedidos_ordenes'>
+                                        {list.items && list.items.map((item, index) => {
+                                            return (
+                                                <div key={index} className='orden__pedidos'>
+                                                    <span className='item__menu'>{item.description} cantidad: {item.quantity}</span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+
+                                </article>
+
+                                <div className="form-check form-switch icons_pedido">
+                                    <div>
+                                        <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Eliminar?</label>
+                                        <input className="form-check-input" type="checkbox" role="switch" id={`flexSwitchCheckDefault${index}`} onChange={() => toggleEliminar(list._id)} />
+                                    </div>
+
+                                    <div>
+                                        <IconView />
+                                        <span className="form-check-label" onClick={() => detailOrden(list._id)} >Detalle pedido</span>
+                                    </div>
+
+                                </div>
+
+                                {idsParaEliminar.includes(list._id) && (
+                                    <FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' onClick={() => eliminar(list._id)} />
+                                )}
+                            </section>
+                        )
+                    })}
+                </section>
+
+
+                <span className='title__color title__pagar'>Ordenes procesadas del dia</span>
+
+                <section className='list__ordens'>
+
+                    {ordensPro && ordensPro.length > 0 && ordensPro.map((list, index) => {
+                        return (
+                            <section key={index} className='ordens__group'>
+
+                                <article className='group__article'>
+                                    <span>Nombre: {list.name}</span>
+                                    <span>Tipo : {list.orderType}</span>
+                                    <span>Total : {list.total}</span>
+                                    <div className='orden__pedido'>
+                                        Pedido:
+                                    </div>
                                     {list.items && list.items.map((item, index) => {
                                         return (
-                                            <div key={index} className='orden__pedidos'>
-                                                <span className='item__menu'>{item.description} cantidad: {item.quantity}</span>
+                                            <div key={index}>
+                                                <span className='item__menu'>{item.description}</span>
+                                                <p className='item__menu'> cantidad: {item.quantity}</p>
                                             </div>
                                         )
                                     })}
-                                </div>
 
-                            </article>
+                                    <div className="form-check form-switch icons_pedido">
 
-                            <div className="form-check form-switch icons_pedido">
-                                <div>
-                                    <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Eliminar?</label>
-                                    <input className="form-check-input" type="checkbox" role="switch" id={`flexSwitchCheckDefault${index}`} onChange={() => toggleEliminar(list._id)} />
-                                </div>
-
-                                <div>
-                                <IconView />
-                                    <span className="form-check-label"  onClick={ () => detailOrden(list._id) } >Detalle pedido</span>
-                                </div>
-
-                            </div>
-
-                            {idsParaEliminar.includes(list._id) && (
-                                <FontAwesomeIcon icon={faTrash} className='menu__icon--select list__icon' onClick={() => eliminar(list._id)} />
-                            )}
-                        </section>
-                    )
-                })}
-            </section>
-
-
-            <span className='title__color title__pagar'>Ordenes procesadas del dia</span>
-
-            <section className='list__ordens'>
-
-                {ordensPro && ordensPro.length > 0 && ordensPro.map((list, index) => {
-                    return (
-                        <section key={index} className='ordens__group'>
-
-                            <article className='group__article' onClick={() => clickPagar(list._id, list.total)}>
-                                <span>Nombre: {list.name}</span>
-                                <span>Tipo : {list.orderType}</span>
-                                <span>Total : {list.total}</span>
-                                <div className='orden__pedido'>
-                                    Pedido:
-                                </div>
-                                {list.items && list.items.map((item, index) => {
-                                    return (
-                                        <div key={index}>
-                                            <span className='item__menu'>{item.description}</span>
-                                            <p className='item__menu'> cantidad: {item.quantity}</p>
+                                        <div>
+                                            <IconView />
+                                            <span className="form-check-label" onClick={() => detailOrden(list._id)} >Detalle pedido</span>
                                         </div>
-                                    )
-                                })}
-                            </article>
 
-                        </section>
-                    )
-                })}
-            </section>
+                                    </div>
+                                </article>
+
+                            </section>
+                        )
+                    })}
+                </section>
+            </div>
         </div>
     )
 }

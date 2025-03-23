@@ -319,7 +319,13 @@ body {
 }
 
 .config__link {
+  display: block;
+  width: 100%;
   color: var(--color-text);
+}
+
+.icon__svg{
+  margin-right: 1rem;
 }
 
 /************************************************/
@@ -849,8 +855,7 @@ body {
   box-shadow: 1px 1px 5px gray inset;
   border-radius: 5rem;
   box-shadow: 0 0 50px -1px rgb(191, 155, 95);
-  overflow: auto;
-  width: 40%;
+  width: 50%;
   margin: 0 auto;
   margin-top: 4rem;
 }

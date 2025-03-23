@@ -83,8 +83,6 @@ const Det_menu = () => {
             const obj = {
                 id_article: opcion.id
             }
-
-            //deletetMenu(obj);
         }
 
         setOpcionesSeleccionadasHam(selectedList);
@@ -108,10 +106,14 @@ const Det_menu = () => {
             setMenu(data.menu);
             setAlitaSelected(data.menu.alitas);
 
+            console.log(data.menu.cantidad_hamburguesa);
+
             if (data.menu.cantidad_hamburguesa > 0) {
                 console.log(data.menu.cantidad_hamburguesa);
                 setHamburguesaAdd('S');
                 setCantidad(data.menu.cantidad_hamburguesa);
+            }else{
+                setHamburguesaAdd('N');
             }
            
         }
@@ -139,7 +141,6 @@ const Det_menu = () => {
                 id_article: opcion.id
             }
 
-            //deletetMenu(obj);
         }
 
         setOpcionesSeleccionadas(selectedList);
@@ -520,7 +521,7 @@ const Det_menu = () => {
                                 <label htmlFor="contable" className='label__form'>Incluye hamburguesa?</label>
                                 <input type="checkbox" name='hamburguesa' id='hamburguesa' 
                                                        onChange={(e) => setHamburguesaAdd(e.target.checked ? 'S' : 'N')} 
-                                                       checked={hamburguesaAdd}/>
+                                                       checked={hamburguesaAdd == 'S' ? true : false}/>
                             </div>
 
                             <div className='content__field--menu'>

@@ -4,6 +4,7 @@ import Global from '../../helpers/Global';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Select from 'react-select';
+import Message from '../Util/Message';
 
 
 const DetalleOrden = () => {
@@ -15,7 +16,6 @@ const DetalleOrden = () => {
     const [menu, setMenu] = useState();
     const [extras, setExtras] = useState();
     const [qingredientes, setQingredientes] = useState([]);
-    const [aingredientes, setAingredientes] = useState();
     const [descripDelivery, setDescripDelivery] = useState();
     const [show, setShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -26,7 +26,6 @@ const DetalleOrden = () => {
     const [checkPago, setCheckPago] = useState(false);
     const [tiporden, setTiporden] = useState({});
     const [ordenType, setOrdenType] = useState(1);
-    const [deliv, setDeliv] = useState('');
     const [changeCheck, setChangeCheck] = useState(false);
     const [nombre, setNombre] = useState('En mesa');
     const [mdelivery, setMdelivery] = useState(0);
@@ -42,14 +41,17 @@ const DetalleOrden = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [cursorPos, setCursorPos] = useState({ start: 0, end: 0 });
     const [arrayAlitas, setArrayAlitas] = useState([]);
-    const [tipoAlitas, setTipoAlitas] = useState(['Full picantes', 'Medio picantes', 'Poco picantes', 'Broster', 'Naturales']);
+    const tipoAlitas = ['Full picantes', 'Medio picantes', 'Poco picantes', 'Broster', 'Naturales'];
     const [selectedAlitas, setSelectedAlitas] = useState([]);
+    const [message, setMessage] = useState();
+    const [variant, setVariant] = useState();
+    const [showAlert, setShowAlert] = useState(false);
+
 
 
 
     const Seccion = ({ key, indexQ, id_menu, setObservation, observation, cursorPos, setCursorPos }) => {
         const textareaRef = useRef(null);
-
 
         const handleTextAreaChange = (itemKey, innerArrayIndex, event) => {
             const { value, selectionStart, selectionEnd } = event.target;
@@ -99,10 +101,15 @@ const DetalleOrden = () => {
         );
     };
 
-    useEffect(() => {
-        console.log(selectedAlitas);
-    }, [selectedAlitas]);
+    const handleAlert = () => {
+        setShowAlert(true);
 
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }
 
     const handleClose = () => setShow(false);
 
@@ -142,7 +149,13 @@ const DetalleOrden = () => {
             }
         });
 
-        //handleClose();
+        if (data.status == "success") {
+            setMessage('Orden actualizada');
+            setVariant('Correcto');
+        } else {
+            setMessage('Error al actualizar la orden');
+            setVariant('errror');
+        }
 
     }
 
@@ -171,35 +184,10 @@ const DetalleOrden = () => {
             setArrayAlitas(array_alas);
 
         } else {
-            console.log('error');
+            setMessage('Error al obtener detalle del menu');
+            setVariant('error');    
+            handleAlert();
         }
-    }
-
-    const devuelveDethamburguesa = async (elemento) => {
-
-        const c_body = {
-            id: elemento
-        }
-
-        const request = await fetch(Global.url + 'det-menu/ingredientesHamburguesa/', {
-            method: "POST",
-            body: JSON.stringify(c_body),
-            headers: {
-                "authorization": token,
-                "Content-Type": "application/json"
-            }
-        });
-
-        const data = await request.json();
-
-        if (data.status == "success") {
-
-            console.log(data.listas);
-
-            setQingredientesHamburguesa(data.listas);
-
-        }
-
     }
 
     const nombreCli = (event) => {
@@ -312,7 +300,9 @@ const DetalleOrden = () => {
 
 
         } else {
-            console.log('error');
+            setMessage('Error al obtener el menu');
+            setVariant('error');
+            handleAlert();
         }
     }
 
@@ -326,10 +316,6 @@ const DetalleOrden = () => {
             buscarDetMenu();
         }
     }, [orden]);
-
-    useEffect(() => {
-        console.log(eIngredienteHamburguesa);
-    }, [eIngredienteHamburguesa]);
 
     const devuelveTipo = async () => {
 
@@ -357,9 +343,6 @@ const DetalleOrden = () => {
 
     }
 
-    useEffect(() => {
-        //console.log(checkedItems);
-    }, [checkedItems]);
 
 
     useEffect(() => {
@@ -408,11 +391,6 @@ const DetalleOrden = () => {
             return updatedState;
         });
     }
-
-    useEffect(() => {
-        console.log(qingredientes)
-    }, [qingredientes]);
-
 
     const actualizaDetalle = async () => {
 
@@ -468,7 +446,11 @@ const DetalleOrden = () => {
 
                 }
 
-                if (checkPago) {
+                setMessage('Orden guardada');
+                setVariant('Correcto');
+                handleAlert();
+
+                /*if (checkPago) {
 
                     navigate('/rousse/pagar', { state: { idOrden } });
 
@@ -476,7 +458,7 @@ const DetalleOrden = () => {
                     let valor = 1;
                     navigate('/rousse/success', { state: { valor } });
 
-                }
+                }*/
             }
         }
     }
@@ -495,7 +477,9 @@ const DetalleOrden = () => {
         if (data.status == "success") {
             console.log('checkInventario...', data.checkInventario);
         } else {
-            console.log('error');
+            setMessage(data.message);
+            setVariant('Error');
+            handleAlert();
         }
     }
 
@@ -505,10 +489,6 @@ const DetalleOrden = () => {
         actualizaDetalle();
 
     }
-
-    useEffect(() => {
-        console.log(eIngredienteHamburguesa);
-    }, [eIngredienteHamburguesa]);
 
     const handleCheckboxIngredientes = (evento, indexQ, index, idmenu, id_article) => {
 
@@ -568,7 +548,9 @@ const DetalleOrden = () => {
                 updatedState[idmenu][items].push(idHamburguesa);
                 if (updatedState[idmenu][items].length > maxCantidadHamburguesa[idmenu]) {
                     updatedState[idmenu][items].pop(); // Eliminar la última hamburguesa agregada
-                    console.log(`No puedes seleccionar más de ${maxCantidadHamburguesa[idmenu]} hamburguesas`);
+                    setMessage('No puedes seleccionar más de ' + maxCantidadHamburguesa[idmenu] + ' hamburguesas');
+                    setVariant('error');
+                    handleAlert();
                     evento.target.checked = false;
                 }
             } else {
@@ -591,11 +573,12 @@ const DetalleOrden = () => {
 
     return (
         <div className='orden__crear orden__detalle orden--ampliar'>
+            <Message showAlert={showAlert} tipo={variant} message={message} />
             <div className="form-check form-switch totales__orden">
-                <span>Total: {total}</span>
+                <span>Total: {total}$</span>
 
                 {(mdelivery > 0 && ordenType != 1) &&
-                    <span>Total con delivery: {total + parseInt(mdelivery)}</span>
+                    <span>Total con delivery: {total + parseInt(mdelivery)}$</span>
                 }
 
             </div>
