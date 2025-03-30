@@ -851,13 +851,13 @@ body {
   align-items: center;
   background-color: rgba(255, 255, 255, 0.06);
   border: 0.15rem solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(15px);
   box-shadow: 1px 1px 5px gray inset;
   border-radius: 5rem;
   box-shadow: 0 0 50px -1px rgb(191, 155, 95);
   width: 50%;
   margin: 0 auto;
   margin-top: 4rem;
+  overflow: hidden;
 }
 
 .detalle__caja{
@@ -1214,12 +1214,13 @@ body {
 
 .option__menu {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
 .menu__option {
   display: flex;
+  width: 20%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -1241,6 +1242,7 @@ body {
   font-size: 2rem;
   padding: 1rem;
   text-shadow: 0.1px 0.1px 1px var(--color-secundary);
+  text-align: center;
 }
 
 
@@ -1323,6 +1325,7 @@ tr:hover {
 }
 
 .button__detalle {
+  width: 100%;
   margin-right: 1rem;
   background-color: var(--color-secundary);
   border-color: var(--color-principal);

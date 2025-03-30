@@ -23,8 +23,9 @@ const Det_menu = () => {
     const [alitas, setAlitas] = useState();
     const [menu, setMenu] = useState('');
     const [alitaSelected, setAlitaSelected] = useState();
-    const [hamburguesaSelected, setHamburguesaSelected] = useState();
+    const [bebida, setBebida] = useState();
     const [cantidad, setCantidad] = useState();
+    const [bebidaSelected, setBebidaSelected] = useState();
 
     let id_menu = location.state.idmenu;
     let nombre = 0;
@@ -38,7 +39,6 @@ const Det_menu = () => {
     }, []);
 
     const changeResta = (evento, id) => {
-        console.log(evento.target.value);
         setResta({
             ...resta,
             [id]: evento.target.value
@@ -71,10 +71,7 @@ const Det_menu = () => {
         }));
 
         insertHamburguesa(hamburguesasSelect, 'A');
-
         setOpcionesSeleccionadasHam(selectedList);
-
-
     }
 
     const onRemoveHam = (selectedList, removedItem) => {
@@ -105,17 +102,16 @@ const Det_menu = () => {
         if (data.status == "success") {
             setMenu(data.menu);
             setAlitaSelected(data.menu.alitas);
-
-            console.log(data.menu.cantidad_hamburguesa);
+            setBebidaSelected(data.menu.bebida);
 
             if (data.menu.cantidad_hamburguesa > 0) {
                 console.log(data.menu.cantidad_hamburguesa);
                 setHamburguesaAdd('S');
                 setCantidad(data.menu.cantidad_hamburguesa);
-            }else{
+            } else {
                 setHamburguesaAdd('N');
             }
-           
+
         }
 
     }
@@ -186,6 +182,13 @@ const Det_menu = () => {
     }
 
     const insertHamburguesa = async (obj, ind) => {
+
+        if (cantidadHamburguesa == 0) {
+            setMessage('Debe ingresar la cantidad de hamburguesa');
+            setVariant('Error');
+            handleAlert();
+            return
+        }
 
         let c_body = {
             id_hamburguesa: obj,
@@ -362,18 +365,35 @@ const Det_menu = () => {
         setAlitaSelected(e);
     }
 
+    const changeBebida = (e) => {
+        setBebida(e);
+    }
+
+    useEffect(() => {
+        actualizaMenu();
+    }, [bebida]);
+
     useEffect(() => {
         actualizaMenu();
         listar();
     }, [alitas]);
 
+ 
+
     const actualizaMenu = async () => {
 
+        let body;
+
         if (alitas) {
-            let body = {
+             body = {
                 alitas: alitas
             };
-
+            
+        }else{
+            body = {
+                bebida: bebida
+            };
+        }
             const request = await fetch(Global.url + 'menu/update/' + id_menu, {
                 method: "POST",
                 body: JSON.stringify(body),
@@ -382,7 +402,7 @@ const Det_menu = () => {
                     "Content-Type": "application/json"
                 }
             });
-        }
+        
     }
 
     return (
@@ -519,9 +539,16 @@ const Det_menu = () => {
 
                             <div className='content__field--menu'>
                                 <label htmlFor="contable" className='label__form'>Incluye hamburguesa?</label>
-                                <input type="checkbox" name='hamburguesa' id='hamburguesa' 
-                                                       onChange={(e) => setHamburguesaAdd(e.target.checked ? 'S' : 'N')} 
-                                                       checked={hamburguesaAdd == 'S' ? true : false}/>
+                                <input type="checkbox" name='hamburguesa' id='hamburguesa'
+                                    onChange={(e) => setHamburguesaAdd(e.target.checked ? 'S' : 'N')}
+                                    checked={hamburguesaAdd == 'S' ? true : false} />
+                            </div>
+
+                            <div className='content__field--menu'>
+                                <label htmlFor="contable" className='label__form'>Incluye bebida?</label>
+                                <input type="checkbox" name='hamburguesa' id='hamburguesa'
+                                    onChange={(e) => changeBebida(e.target.checked ? 'S' : 'N')}
+                                    checked={bebidaSelected == 'S' ? true : false} />
                             </div>
 
                             <div className='content__field--menu'>
@@ -535,6 +562,13 @@ const Det_menu = () => {
 
                                 <div>
 
+                                    <div className='content__field--menu'>
+                                        <label htmlFor="contable" className='label__form'>Cantidad de hamburguesa?</label>
+                                        <input type="text" name='cantidad_hamburguesa' id='cantidad_hamburguesa' onChange={(e) => setCantidadHamburguesa(e.target.value)}
+                                            defaultValue={cantidad}
+                                        />
+                                    </div>
+
                                     <Multiselect
                                         options={hamburguesas} // Opciones para mostrar en el dropdown
                                         selectedValues={opcionesSeleccionadasHam} // Valores preseleccionados
@@ -542,13 +576,6 @@ const Det_menu = () => {
                                         onRemove={onRemoveHam} // Función que se activará al eliminar un elemento
                                         displayValue="name" // Propiedad del objeto a mostrar en el dropdown
                                     />
-
-                                    <div className='content__field--menu'>
-                                        <label htmlFor="contable" className='label__form'>Cantidad de hamburguesa?</label>
-                                        <input type="text" name='cantidad_hamburguesa' id='cantidad_hamburguesa' onChange={(e) => setCantidadHamburguesa(e.target.value)} 
-                                        defaultValue={cantidad}
-                                        />
-                                    </div>
 
                                 </div>
 

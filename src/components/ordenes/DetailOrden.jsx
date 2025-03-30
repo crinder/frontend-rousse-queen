@@ -16,6 +16,7 @@ const DetailOrden = () => {
     const [qingredientes, setQingredientes] = useState();
     const [detalle, setDetalle] = useState();
     const [indAlitas, setIndAlitas] = useState(true);
+    const [bebida, setBebida] = useState();
     const tipo_orden = {
         1: 'En mesa',
         2: 'Fiado sin abono',
@@ -71,8 +72,11 @@ const DetailOrden = () => {
             setObservacion(data.c_observacion);
             setQingredientes(data.qingredientesHamburguesa);
             setDetalle(data.detalle);
+            setBebida(data.c_bebida);
 
-            if(data.c_hamburguesa.length > 0){
+            console.log(data.c_bebida);
+
+            if (data.c_hamburguesa.length > 0) {
                 setIndAlitas(false);
             }
 
@@ -87,9 +91,8 @@ const DetailOrden = () => {
             detalle && detalle.map((details, index) => {
                 return (
                     <div key={index} className=''>
-                        <span className='title__color title__pagar'>Alitas:  </span>
-
                         {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
+                            <span className='title__color title__pagar'>Alitas:  </span>
 
                             if (indice == item.id_menu) {
                                 return (
@@ -122,10 +125,9 @@ const DetailOrden = () => {
             detalle && detalle.map((details, index) => {
                 return (
                     <div key={index} className=''>
-                        <span className='title__color title__pagar'>Alitas:  </span>
-
-                        {details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
-
+                        
+                        {details.id_menu == item.id_menu && details.alitas && Object.entries(details.alitas).map(([indice, valor], index) => {
+                            
                             return (
                                 <div key={indice} className='grupo__menu extend__menu'>
                                     {Array.isArray(valor) && valor.map((subArray, subIndex) => {
@@ -133,7 +135,7 @@ const DetailOrden = () => {
                                         return (
                                             <div key={subIndex}>
                                                 {subArray.map((item, itemIndex) => (
-                                                    <span key={itemIndex} className='title__color title__pagar'>{subIndex + 1} : {item}</span>
+                                                    <span key={itemIndex} className='title__color title__pagar'>Alitas : {item}</span>
                                                 ))}
                                             </div>
                                         );
@@ -253,18 +255,44 @@ const DetailOrden = () => {
                                                                 })}
 
                                                             </div>
+
+                                                            <div>
+                                                                {bebida && bebida.map((qing, index) => {
+
+                                                                    const ingFiltradas = qing.bebida.filter(
+                                                                        (resultadObs) =>
+                                                                            resultado.idmenu == resultadObs.idmenu &&
+                                                                            item.id_menu == resultadObs.idmenu &&
+                                                                            resultadObs.indice == resultado.indice
+                                                                    );
+
+                                                                    // Eliminar duplicados usando Set
+                                                                    const ingUnicos = [...new Set(ingFiltradas.map(JSON.stringify))].map(JSON.parse);
+
+                                                                    return ingUnicos.map((resultadObs, indexObser) => (
+                                                                        <div key={`resultado-<span class="math-inline">\{grupoIndex\}\-</span>{indexObser}`}
+                                                                            className='grupo__observacion extend__menu'>
+                                                                            <span className='title__color title__pagar'>Bebida: </span>
+                                                                            <span className='title__descripcion'>{resultadObs.ingrediente.name_article}</span>
+                                                                        </div>
+                                                                    ));
+                                                                })}
+                                                            </div>
+
                                                             <Alitas detalle={detalle} item={item} resultado={resultado.indice} />
                                                         </div>
                                                     ))}
+
+
                                                 </div>
                                             ))}
                                             <hr />
 
 
                                             {indAlitas &&
-                                                <AlitasSin detalle={detalle} item={item}/>
+                                                <AlitasSin detalle={detalle} item={item} />
                                             }
-                                            
+
                                         </div>
 
 

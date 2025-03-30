@@ -9,12 +9,12 @@ const Articulos = () => {
   const [lista, setLista] = useState("");
   const [articulos, setArticulos] = useState([]);
   const token = localStorage.getItem('token');
-  const [idsParaActualizar, setIdsParaActualizar] = useState([]);
   const { form, changed } = useForm({});
   const [saved, setSaved] = useState("");
   const [articulo, setArticulo] = useState("");
   const [isContable, setIsContable] = useState(false);
   const [extra, setExtra] = useState('N');
+  const [bebida, setBebida] = useState('N');
 
   useEffect(() => {
 
@@ -63,8 +63,8 @@ const Articulos = () => {
 
     articulos.contable = isContable;
     articulos.extra = extra;
+    articulos.bebida = bebida;
 
-    console.log(articulos);
 
     let token = localStorage.getItem('token');
 
@@ -231,6 +231,11 @@ const Articulos = () => {
                 <div className='content__field--menu'>
                   <label htmlFor="contable" className='label__form'>Ingrediente extra?</label>
                   <input type="checkbox" name='contable' id='contable' onChange={(e) => setExtra(e.target.checked ? 'S' : 'N')} />
+                </div>
+
+                <div className='content__field--menu'>
+                  <label htmlFor="contable" className='label__form'>Bebida?</label>
+                  <input type="checkbox" name='contable' id='contable' onChange={(e) => setBebida(e.target.checked ? 'S' : 'N')} />
                 </div>
 
                 {extra == 'S' &&

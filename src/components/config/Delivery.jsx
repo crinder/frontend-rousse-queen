@@ -1,12 +1,18 @@
 import { React, useEffect, useState } from 'react'
 import Global from '../../helpers/Global';
 import useForm from '../../assets/hooks/useForm';
+import Message from '../Util/Message';
+import { useNavigate } from 'react-router-dom';
 
 const Delivery = () => {
 
     const [costDelivery, setCostDelivery] = useState(1);
     const { form, changed } = useForm({});
     const token = localStorage.getItem("token");
+    const [message, setMessage] = useState();
+    const [variant, setVariant] = useState();
+    const [showAlert, setShowAlert] = useState(false);
+    const navigate = useNavigate();
 
     const crear = async (e) => {
         e.preventDefault();
@@ -28,18 +34,31 @@ const Delivery = () => {
         const dataRegist = await requestRegist.json();
 
         if (dataRegist.status == 'success') {
+            setMessage('Zona guardada');
+            setVariant('Correcto');
 
         } else {
-            console.log('error');
+            setMessage('Error guardando zona '+dataRegist.message);
+            setVariant('Error');
         }
+
+        handleAlert();
     }
 
+    const handleAlert = () => {
+        setShowAlert(true); 
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }   
 
 
 
     return (
         <div className='orden__crear'>
-
+            <Message showAlert={showAlert} tipo={variant} message={message} />
             <section className='crear__content detmenu__section'>
                 <form className='crear__orden' onSubmit={evento => crear(evento)}>
 
@@ -61,8 +80,9 @@ const Delivery = () => {
 
                     <input type="submit" className="user__button" value="Crear" />
 
-
+                    
                 </form>
+                <input className="user__button" value="Lista delivery" onClick={() => navigate('/rousse/list-deliveries')} />
             </section>
 
         </div>

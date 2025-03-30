@@ -1,34 +1,39 @@
 import React, { useEffect, useState } from 'react'
 import Global from '../../helpers/Global';
-import Multiselect from 'multiselect-react-dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import Message from '../Util/Message';
 
 const Ordenes = () => {
 
-    const [checkPago, setCheckPago] = useState(false);
     const [opciones, setOpciones] = useState([]);
     const [cantidad, setCantidad] = useState({});
     const navigate = useNavigate();
-    const [total, setTotal] = useState(0);
+    const [total, setTotal]   = useState(0);
     const [activo, setActivo] = useState(false);
-    const [detalleMenu, setDetalleMenu] = useState([]);
-    const token = localStorage.getItem("token");
+    const [showAlert, setShowAlert] = useState(false);
+    const [variant, setVariant] = useState();
+    const [message, setMessage] = useState();
+    const token  = localStorage.getItem("token");
     const idcaja = localStorage.getItem("idcaja");
-    const [ingredinetes, setIngredinetes] = useState(false);
 
     useEffect(() => {
         devuelveMenu();
-
     }, []);
 
     useEffect(() => {
         onSelect();
     }, [cantidad]);
 
-
-
+    const handleAlert = () => {
+        setShowAlert(true); 
+        setTimeout(() => {
+            setShowAlert(false);
+            setMessage('');
+            setVariant('');
+        }, 5000);
+    }
 
     const onSelect = async () => {
 
@@ -41,7 +46,9 @@ const Ordenes = () => {
                 totalGen += devuelveMonto * opcion.quantity;
                 setTotal(totalGen);
             } catch (error) {
-                console.error("Error al actualizar precios:", error);
+                setMessage('Error al actualizar precios...', error);
+                setVariant('Error');
+                handleAlert();
             }
         });
 
@@ -51,7 +58,6 @@ const Ordenes = () => {
     const guardarOrden = async (e) => {
         e.preventDefault();
         setActivo(true);
-
 
         const objeto = Object.values(cantidad);
         let array = [];
@@ -69,12 +75,16 @@ const Ordenes = () => {
 
 
         if (array == [] || array == '') {
-            console.log('debe seleccionar un menu');
+           setMessage('Debe seleccionar un menu');
+           setVariant('Error');
+           handleAlert();
             return
         }
 
         if (total <= 0) {
-            console.log('El total no debe ser 0');
+            setMessage('El total no debe ser 0');
+            setVariant('Error');
+            handleAlert();
             return
         }
 
@@ -103,7 +113,9 @@ const Ordenes = () => {
             navigate('/rousse/detalle-orden', { state: { idOrden: dataRegis.ordenSave } });
 
         } else {
-            console.log('Error guardando orden');
+            setMessage('Error guardando orden');
+            setVariant('Error');
+            handleAlert();
         }
     }
 
@@ -195,6 +207,7 @@ const Ordenes = () => {
 
     return (
         <div className='orden__crear'>
+            <Message showAlert={showAlert} tipo={variant} message={message} />
             <section className='crear__content detmenu__section'>
                 <form className='crear__orden' onSubmit={guardarOrden}>
 
@@ -204,7 +217,7 @@ const Ordenes = () => {
                             return (
                                 <div className='menu__option'>
                                     <span className='menu__description'>{opcion.description}</span>
-                                    <span className='menu__precio'>Precio: {opcion.price}</span>
+                                    <span className='menu__precio'>Precio: {opcion.price}$</span>
                                     <div className='select__select'>
                                         <FontAwesomeIcon icon={faMinus} className='menu__icon--select' onClick={() => decrementar(opcion._id)} />
                                             <span className='select__opcion'>{cantidad[opcion._id]?.quantity || 0}</span>

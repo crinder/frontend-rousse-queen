@@ -34,10 +34,11 @@ const DetalleOrden = () => {
     const [listDelivery, setListDelivery] = useState('');
     const [idDelivery, setIdDelivery] = useState('');
     const [hamburguesaSelected, setHamburguesaSelected] = useState();
+    const [bebidaSelected, setBebidaSelected] = useState();
     const [maxCantidadHamburguesa, setMaxCantidadHamburguesa] = useState(0);
     const [selectedHamburguesa, setSelectedHamburguesa] = useState([]);
-    const [qingredientesHamburguesa, setQingredientesHamburguesa] = useState([]);
     const [eIngredienteHamburguesa, setEIngredienteHamburguesa] = useState([]);
+    const [selectedBebida, setSelectedBebida] = useState([]);
     const [checkedItems, setCheckedItems] = useState([]);
     const [cursorPos, setCursorPos] = useState({ start: 0, end: 0 });
     const [arrayAlitas, setArrayAlitas] = useState([]);
@@ -137,7 +138,8 @@ const DetalleOrden = () => {
             qingre: qingredientes,
             qingredientes: eIngredienteHamburguesa,
             hamburguesa: selectedHamburguesa,
-            alitas: selectedAlitas
+            alitas: selectedAlitas,
+            bebida: selectedBebida
         }
 
         const request = await fetch(Global.url + 'det-orden/update/' + id_det_orden, {
@@ -148,6 +150,8 @@ const DetalleOrden = () => {
                 "authorization": token
             }
         });
+
+        const data = await request.json();
 
         if (data.status == "success") {
             setMessage('Orden actualizada');
@@ -185,7 +189,7 @@ const DetalleOrden = () => {
 
         } else {
             setMessage('Error al obtener detalle del menu');
-            setVariant('error');    
+            setVariant('error');
             handleAlert();
         }
     }
@@ -294,9 +298,14 @@ const DetalleOrden = () => {
                 return item.hamburguesaSelected;
             });
 
+            let bebidas = data.listas.map(item => {
+                return item.bebidas;
+            });
+
             setMenu(listArticle);
             setExtras(listExtra);
             setHamburguesaSelected(hamburguesas);
+            setBebidaSelected(bebidas);
 
 
         } else {
@@ -450,7 +459,7 @@ const DetalleOrden = () => {
                 setVariant('Correcto');
                 handleAlert();
 
-                /*if (checkPago) {
+                if (checkPago) {
 
                     navigate('/rousse/pagar', { state: { idOrden } });
 
@@ -458,7 +467,7 @@ const DetalleOrden = () => {
                     let valor = 1;
                     navigate('/rousse/success', { state: { valor } });
 
-                }*/
+                }
             }
         }
     }
@@ -475,7 +484,7 @@ const DetalleOrden = () => {
         const data = await request.json();
 
         if (data.status == "success") {
-            console.log('checkInventario...', data.checkInventario);
+            //actualizaDetalle();
         } else {
             setMessage(data.message);
             setVariant('Error');
@@ -486,13 +495,10 @@ const DetalleOrden = () => {
     const actualizarOrden = async (e) => {
         e.preventDefault();
         checkInventario();
-        actualizaDetalle();
-
     }
 
     const handleCheckboxIngredientes = (evento, indexQ, index, idmenu, id_article) => {
 
-        const idHamburguesa = evento.target.value;
         const isChecked = evento.target.checked;
 
         setEIngredienteHamburguesa(prevState => {
@@ -533,6 +539,33 @@ const DetalleOrden = () => {
         });
 
     }
+
+    const handleChangeBebida = (evento, items, index, idmenu) => {
+        const idBebida = evento.target.value;
+        const isChecked = evento.target.checked;
+
+        setSelectedBebida(prevState => {
+            const updatedState = { ...prevState };
+
+            if (!prevState[idmenu]) updatedState[idmenu] = [];
+            if (!prevState[idmenu]?.[items]) updatedState[idmenu][items] = [];
+
+            if (isChecked) {
+                updatedState[idmenu][items].push(idBebida);
+                if (updatedState[idmenu][items].length > 0 && updatedState[idmenu][items].length > 1) {
+                    updatedState[idmenu][items].pop(); // Eliminar la última hamburguesa agregada
+                    setMessage('No puedes seleccionar más de 1 bebida');
+                    setVariant('error');
+                    handleAlert();
+                    evento.target.checked = false;
+                }
+            } else {
+                updatedState[idmenu][items] = updatedState[idmenu][items].filter(item => item != idBebida);
+            }
+
+            return updatedState;
+        });
+    };
 
     const handleCheckboxChange = (evento, items, index, idmenu) => {
         const idHamburguesa = evento.target.value;
@@ -714,8 +747,8 @@ const DetalleOrden = () => {
                                                             <li className='alitas__item' key={index}>
                                                                 <input type="checkbox" name='alitas' id='alitas' value={alita}
                                                                     checked={selectedAlitas[selectedItem.id_menu._id]?.[indexQ]?.includes(alita) || false}
-                                                                    onChange={(e) => handleAlitas(e, indexQ, selectedItem.id_menu._id)} 
-                                                                    className='alitas__check'/>
+                                                                    onChange={(e) => handleAlitas(e, indexQ, selectedItem.id_menu._id)}
+                                                                    className='alitas__check' />
                                                                 <label htmlFor="alitas" >{alita}</label>
                                                             </li>
                                                         )
@@ -723,6 +756,38 @@ const DetalleOrden = () => {
                                                 </ul>
                                             </div>
                                         }
+
+                                        {bebidaSelected && bebidaSelected.length > 0 &&
+
+                                            <div className=''>
+                                                <span className='title__color title__pagar'>Bebida:  </span>
+                                            </div>
+
+                                        }
+
+                                        {bebidaSelected && bebidaSelected.length > 0 && bebidaSelected.map((bebidas, index) => {
+
+                                            return (
+                                                <span>{bebidas.map(bebida => {
+                                                    if (bebida.idmenu == selectedItem.id_menu._id) {
+                                                        return (
+                                                            <div>
+                                                                <input type="checkbox" name='bebida' id='bebida' value={bebida._id}
+
+                                                                    onChange={(evento) => handleChangeBebida(evento, indexQ, index, selectedItem.id_menu._id)}
+                                                                    className='bebida__check' />
+                                                                <label htmlFor="bebida" >{bebida.name_article}</label>
+                                                            </div>
+
+                                                        )
+                                                    }
+                                                })}</span>
+                                            )
+
+                                        })
+                                        }
+
+
                                     </div>
 
                                 ))}
